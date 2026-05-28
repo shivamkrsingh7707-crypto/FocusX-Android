@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/amoled_black"
+    android:paddingTop="12dp"
+    tools:context=".MainActivity">
+
+    <!-- Header Bar -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/headerBar"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:paddingHorizontal="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/brandTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:fontFamily="sans-serif"
+            android:text="@string/app_name"
+            android:textColor="@color/white_primary"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/utilityGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:id="@+id/streakContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp">
+
+                <ImageView
+                    android:id="@+id/streakIcon"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_streak" />
+
+                <TextView
+                    android:id="@+id/streakCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:fontFamily="sans-serif"
+                    android:text="0"
+                    android:textColor="@color/streak_orange"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/themeToggle"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?android:selectableItemBackgroundBorderless"
+                android:contentDescription="@null"
+                android:onClick="onThemeToggleClick"
+                android:padding="6dp"
+                android:scaleType="centerInside"
+                android:src="@android:drawable/ic_menu_view" />
+
+            <ImageButton
+                android:id="@+id/settingsButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?android:selectableItemBackgroundBorderless"
+                android:contentDescription="@string/settings"
+                android:onClick="onSettingsClick"
+                android:padding="6dp"
+                android:scaleType="centerInside"
+                android:src="@android:drawable/ic_menu_manage" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Timer Body Section -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/timerBody"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="24dp"
+        app:layout_constraintBottom_toTopOf="@id/statsCard"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerBar">
+
+        <!-- Circular Progress with Centered Timer -->
+        <FrameLayout
+            android:id="@+id/timerCircleContainer"
+            android:layout_width="280dp"
+            android:layout_height="280dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.45">
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/timerProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminate="false"
+                app:indicatorColor="@color/premium_violet"
+                app:indicatorSize="280dp"
+                app:trackColor="@color/off_black_elevated"
+                app:trackThickness="4dp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/timerDisplay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif"
+                    android:fontFeatureSettings="tnum"
+                    android:includeFontPadding="false"
+                    android:text="25:00"
+                    android:textColor="@color/white_primary"
+                    android:textSize="64sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/timerStateLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="sans-serif"
+                    android:text="Ready"
+                    android:textColor="@color/muted_gray"
+                    android:textSize="13sp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <!-- Category Badge -->
+        <TextView
+            android:id="@+id/categoryBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_badge"
+            android:clickable="true"
+            android:focusable="true"
+            android:fontFamily="sans-serif"
+            android:gravity="center"
+            android:onClick="onCategoryClick"
+            android:paddingHorizontal="16dp"
+            android:text="Studying: Math"
+            android:textAllCaps="false"
+            android:textColor="@color/muted_gray_light"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/timerCircleContainer" />
+
+        <!-- Category dropdown indicator -->
+        <ImageView
+            android:id="@+id/categoryDropdownArrow"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginStart="4dp"
+            android:contentDescription="@null"
+            android:src="@android:drawable/arrow_down_float"
+            app:layout_constraintBottom_toBottomOf="@id/categoryBadge"
+            app:layout_constraintStart_toEndOf="@id/categoryBadge"
+            app:layout_constraintTop_toTopOf="@id/categoryBadge"
+            app:tint="@color/muted_gray" />
+
+        <!-- Timer Controls -->
+        <LinearLayout
+            android:id="@+id/timerControls"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/categoryBadge">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/startButton"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="180dp"
+                android:layout_height="52dp"
+                android:backgroundTint="@color/premium_violet"
+                android:fontFamily="sans-serif"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onStartClick"
+                android:text="@string/start_focus"
+                android:textAllCaps="false"
+                android:textColor="@color/white_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="26dp"
+                app:icon="@android:drawable/ic_media_play"
+                app:iconGravity="textStart"
+                app:iconTint="@color/white_primary" />
+
+        </LinearLayout>
+
+        <!-- Active Session Controls (hidden until start) -->
+        <LinearLayout
+            android:id="@+id/activeControls"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/categoryBadge">
+
+            <com.google.android.material.button.MaterialButton
+            android:id="@+id/resetButton"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:fontFamily="sans-serif"
+            android:onClick="onResetClick"
+            android:text="@string/reset"
+            android:textAllCaps="false"
+            android:textColor="@color/muted_gray"
+            android:textSize="14sp"
+            app:cornerRadius="24dp" />
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="0dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/pauseButton"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="160dp"
+                android:layout_height="52dp"
+                android:backgroundTint="@color/premium_violet"
+                android:fontFamily="sans-serif"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:onClick="onPauseClick"
+                android:text="@string/pause_session"
+                android:textAllCaps="false"
+                android:textColor="@color/white_primary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:cornerRadius="26dp"
+                app:icon="@android:drawable/ic_media_pause"
+                app:iconGravity="textStart"
+                app:iconTint="@color/white_primary" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Stats Card -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/statsCard"
+        android:layout_width="0dp"
+        android:layout_height="88dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/bg_stats_card"
+        android:padding="16dp"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/todaysStudyLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:text="@string/todays_study"
+            android:textColor="@color/muted_gray"
+            android:textSize="11sp"
+            app:layout_constraintEnd_toStartOf="@id/divider"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/todaysStudyValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="sans-serif"
+            android:fontFeatureSettings="tnum"
+            android:text="0 min"
+            android:textColor="@color/white_primary"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/divider"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/todaysStudyLabel" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_marginVertical="8dp"
+            android:background="@color/white_8"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/focusScoreLabel"
+            app:layout_constraintStart_toEndOf="@id/todaysStudyLabel"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/focusScoreLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:text="@string/focus_score"
+            android:textColor="@color/muted_gray"
+            android:textSize="11sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/divider"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/focusScoreValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:fontFamily="sans-serif"
+            android:fontFeatureSettings="tnum"
+            android:text="0%"
+            android:textColor="@color/premium_violet"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/divider"
+            app:layout_constraintTop_toBottomOf="@id/focusScoreLabel" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Bottom Navigation Bar -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:background="@color/amoled_black"
+        app:elevation="0dp"
+        app:itemIconTint="@color/bottom_nav_color"
+        app:itemTextColor="@color/bottom_nav_color"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_nav_menu"
+        app:itemActiveIndicatorStyle="@null" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.FocusX" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/premium_violet</item>
+        <item name="colorOnPrimary">@color/white_primary</item>
+        <item name="colorPrimaryContainer">@color/off_black_card</item>
+        <item name="colorOnPrimaryContainer">@color/premium_violet</item>
+        <item name="colorSecondary">@color/premium_violet_dark</item>
+        <item name="colorOnSecondary">@color/white_primary</item>
+        <item name="colorSecondaryContainer">@color/off_black_elevated</item>
+        <item name="colorOnSecondaryContainer">@color/muted_gray_light</item>
+        <item name="colorTertiary">@color/muted_gray_light</item>
+        <item name="colorOnTertiary">@color/amoled_black</item>
+        <item name="colorError">@color/error_red</item>
+        <item name="colorOnError">@color/white_primary</item>
+        <item name="colorSurface">@color/off_black_surface</item>
+        <item name="colorOnSurface">@color/white_80</item>
+        <item name="colorSurfaceVariant">@color/off_black_card</item>
+        <item name="colorOnSurfaceVariant">@color/muted_gray</item>
+        <item name="colorBackground">@color/amoled_black</item>
+        <item name="colorOnBackground">@color/white_80</item>
+        <item name="colorOutline">@color/white_8</item>
+        <item name="colorOutlineVariant">@color/off_black_elevated</item>
+
+        <item name="android:statusBarColor">@color/amoled_black</item>
+        <item name="android:navigationBarColor">@color/amoled_black</item>
+        <item name="android:windowBackground">@color/amoled_black</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="Theme.FocusX.BottomSheet" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.FocusX.BottomSheet</item>
+    </style>
+
+    <style name="Widget.FocusX.BottomSheet" parent="Widget.Material3.BottomSheet">
+        <item name="android:background">@color/off_black_surface</item>
+        <item name="android:elevation">8dp</item>
+    </style>
+</resources>
