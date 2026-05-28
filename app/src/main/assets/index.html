@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FocusX - Study Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo">
+        <span class="logo-icon">X</span>
+        <h1>FocusX</h1>
+      </div>
+      <div class="header-actions">
+        <span id="streakDisplay" class="streak-badge">🔥 0</span>
+        <button id="themeToggle" class="icon-btn" title="Toggle dark mode">🌙</button>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="timer">
+        <span>⏱️</span> Timer
+      </button>
+      <button class="tab" data-tab="dashboard">
+        <span>📊</span> Progress
+      </button>
+      <button class="tab" data-tab="tests">
+        <span>📝</span> Tests
+      </button>
+      <button class="tab" data-tab="settings">
+        <span>⚙️</span> Settings
+      </button>
+    </nav>
+
+    <main>
+      <!-- TIMER TAB -->
+      <section id="tab-timer" class="tab-content active">
+        <div class="timer-container">
+          <div class="timer-display" id="timerDisplay">00:00:00</div>
+          <div class="timer-subject-select">
+            <label for="timerSubject">Studying:</label>
+            <select id="timerSubject"></select>
+          </div>
+          <div class="timer-controls">
+            <button id="timerStart" class="btn btn-primary">▶ Start</button>
+            <button id="timerPause" class="btn btn-secondary" disabled>⏸ Pause</button>
+            <button id="timerReset" class="btn btn-danger">⏹ Reset</button>
+          </div>
+          <div id="timerStatus" class="timer-status">Ready</div>
+          <div class="today-stats">
+            <div class="stat-card">
+              <span class="stat-label">Today's Study</span>
+              <span class="stat-value" id="todayMinutes">0 min</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Focus Score</span>
+              <span class="stat-value" id="focusScore">0%</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DASHBOARD TAB -->
+      <section id="tab-dashboard" class="tab-content">
+        <div class="dashboard">
+          <div class="dashboard-cards">
+            <div class="dash-card streak-card">
+              <div class="dash-card-icon">🔥</div>
+              <div class="dash-card-info">
+                <span class="dash-card-value" id="dashStreak">0</span>
+                <span class="dash-card-label">Day Streak</span>
+              </div>
+            </div>
+            <div class="dash-card">
+              <div class="dash-card-icon">⏱️</div>
+              <div class="dash-card-info">
+                <span class="dash-card-value" id="dashTodayTime">0m</span>
+                <span class="dash-card-label">Today</span>
+              </div>
+            </div>
+            <div class="dash-card">
+              <div class="dash-card-icon">🎯</div>
+              <div class="dash-card-info">
+                <span class="dash-card-value" id="dashFocus">0%</span>
+                <span class="dash-card-label">Focus</span>
+              </div>
+            </div>
+            <div class="dash-card">
+              <div class="dash-card-icon">📚</div>
+              <div class="dash-card-info">
+                <span class="dash-card-value" id="dashSubjects">0</span>
+                <span class="dash-card-label">Subjects</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-section">
+            <h3>Weekly Progress</h3>
+            <div class="chart-controls">
+              <button class="chart-btn active" data-period="week">Week</button>
+              <button class="chart-btn" data-period="month">Month</button>
+            </div>
+            <div class="chart-container" id="progressChart"></div>
+          </div>
+
+          <div class="subject-breakdown">
+            <h3>Subject Breakdown (Today)</h3>
+            <div id="subjectBreakdown"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TESTS TAB -->
+      <section id="tab-tests" class="tab-content">
+        <div class="tests-container">
+          <div class="test-form">
+            <h3>Log Test Score</h3>
+            <div class="form-row">
+              <select id="testSubject"></select>
+              <input type="number" id="testScore" placeholder="Your score" min="0">
+              <input type="number" id="testTotal" placeholder="Out of" min="1" value="100">
+              <button id="testAdd" class="btn btn-primary">+ Add</button>
+            </div>
+          </div>
+          <div class="test-stats">
+            <div class="stat-card">
+              <span class="stat-label">Average</span>
+              <span class="stat-value" id="testAverage">--</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Tests Given</span>
+              <span class="stat-value" id="testCount">0</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Best Score</span>
+              <span class="stat-value" id="testBest">--</span>
+            </div>
+          </div>
+          <div class="test-list-section">
+            <div class="test-list-header">
+              <h3>Test History</h3>
+              <select id="testFilter">
+                <option value="all">All Subjects</option>
+              </select>
+            </div>
+            <div id="testList" class="test-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS TAB -->
+      <section id="tab-settings" class="tab-content">
+        <div class="settings-container">
+          <div class="setting-group">
+            <h3>Daily Goal</h3>
+            <div class="form-row">
+              <input type="number" id="dailyGoalInput" min="1" value="120">
+              <span>minutes</span>
+              <button id="saveGoal" class="btn btn-primary">Save</button>
+            </div>
+          </div>
+          <div class="setting-group">
+            <h3>Manage Subjects</h3>
+            <div class="form-row">
+              <input type="text" id="newSubjectInput" placeholder="Enter subject name">
+              <button id="addSubject" class="btn btn-primary">+ Add</button>
+            </div>
+            <div id="subjectList" class="subject-list"></div>
+            <p class="hint">Click ✕ to remove a subject</p>
+          </div>
+          <div class="setting-group">
+            <h3>Data</h3>
+            <div class="data-actions">
+              <button id="exportData" class="btn btn-secondary">📥 Export Data</button>
+              <button id="clearData" class="btn btn-danger">🗑️ Clear All Data</button>
+            </div>
+          </div>
+          <div class="setting-group about-group">
+            <p><strong>FocusX</strong> — Track your study sessions, monitor progress, and build streaks.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

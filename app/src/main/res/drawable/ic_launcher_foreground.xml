@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- X letter for FocusX -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,32L50,46L62,32L68,38L56,52L68,66L62,72L50,58L38,72L32,66L44,52L32,38Z" />
+</vector>
