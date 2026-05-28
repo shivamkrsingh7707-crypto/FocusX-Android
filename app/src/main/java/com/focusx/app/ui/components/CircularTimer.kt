@@ -24,9 +24,6 @@ import androidx.compose.ui.unit.sp
 import com.focusx.app.audio.AudioEngine
 import com.focusx.app.data.*
 import com.focusx.app.ui.theme.*
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 
 @Composable
 fun CircularTimer(

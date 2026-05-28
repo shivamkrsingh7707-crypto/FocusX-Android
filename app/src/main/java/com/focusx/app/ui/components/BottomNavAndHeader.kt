@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -16,12 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.focusx.app.MainActivity
-import com.focusx.app.audio.AudioEngine
-import com.focusx.app.data.*
+import com.focusx.app.Tab
 import com.focusx.app.ui.theme.*
 
 @Composable
@@ -50,7 +47,6 @@ fun FocusXHeader(
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-            // Streak badge
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(50))
@@ -92,8 +88,8 @@ fun FocusXHeader(
 
 @Composable
 fun FocusXBottomNav(
-    activeTab: MainActivity.Tab,
-    onTabSelect: (MainActivity.Tab) -> Unit,
+    activeTab: Tab,
+    onTabSelect: (Tab) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -111,7 +107,7 @@ fun FocusXBottomNav(
             modifier = Modifier.fillMaxWidth().padding(4.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
-            MainActivity.Tab.entries.forEach { tab ->
+            for (tab in Tab.values()) {
                 val isActive = tab == activeTab
                 Column(
                     modifier = Modifier
@@ -123,20 +119,20 @@ fun FocusXBottomNav(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
+                    val icon = when (tab) {
+                        Tab.Timer -> "\u23F1\uFE0F"
+                        Tab.Progress -> "\uD83D\uDCCA"
+                        Tab.Tests -> "\uD83D\uDCDD"
+                    }
+                    Text(icon, fontSize = 16.sp)
+
+                    val label = when (tab) {
+                        Tab.Timer -> "Timer"
+                        Tab.Progress -> "Progress"
+                        Tab.Tests -> "Tests"
+                    }
                     Text(
-                        when (tab) {
-                            MainActivity.Tab.Timer -> "\u23F1\uFE0F"
-                            MainActivity.Tab.Progress -> "\uD83D\uDCCA"
-                            MainActivity.Tab.Tests -> "\uD83D\uDCDD"
-                        },
-                        fontSize = 16.sp,
-                    )
-                    Text(
-                        when (tab) {
-                            MainActivity.Tab.Timer -> "Timer"
-                            MainActivity.Tab.Progress -> "Progress"
-                            MainActivity.Tab.Tests -> "Tests"
-                        },
+                        label,
                         fontSize = 9.sp,
                         fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Medium,
                         color = if (isActive) Accent else Text3Dark,
