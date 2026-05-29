@@ -1,8 +1,7 @@
 package com.focusx.app
 
-import android.media.AudioFormat
 import android.media.AudioManager
-import android.media.AudioTrack
+import android.media.ToneGenerator
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -17,8 +16,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.focusx.app.databinding.ActivityMainBinding
 import com.focusx.app.ui.settings.SettingsBottomSheet
-import kotlin.math.sin
-import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
 
@@ -284,68 +281,53 @@ class MainActivity : AppCompatActivity() {
             .start()
     }
 
-    // ─── Synthesized Audio Chimes ─────────────────────────────────────────────
+    // ─── Synthesized Audio Chimes (ToneGenerator API) ────────────────────────
 
     private fun playStartChime() {
         if (!soundEnabled) return
         Thread {
-            playSine(880f, 140)
-            sleep(100)
-            playSine(1320f, 200)
+            val tg = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 60)
+            try {
+                tg.startTone(ToneGenerator.TONE_DTMF_1, 140)
+                sleep(150)
+                tg.startTone(ToneGenerator.TONE_DTMF_3, 200)
+                sleep(210)
+            } finally {
+                tg.release()
+            }
         }.apply { isDaemon = true; start() }
     }
 
     private fun playPauseChime() {
         if (!soundEnabled) return
         Thread {
-            playSine(300f, 200)
+            val tg = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 35)
+            try {
+                tg.startTone(ToneGenerator.TONE_PROP_NACK, 200)
+                sleep(210)
+            } finally {
+                tg.release()
+            }
         }.apply { isDaemon = true; start() }
     }
 
     private fun playCompleteChime() {
         if (!soundEnabled) return
         Thread {
-            playSine(523f, 180)
-            sleep(80)
-            playSine(659f, 180)
-            sleep(80)
-            playSine(784f, 180)
-            sleep(80)
-            playSine(1047f, 500)
+            val tg = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 55)
+            try {
+                tg.startTone(ToneGenerator.TONE_DTMF_1, 160)
+                sleep(170)
+                tg.startTone(ToneGenerator.TONE_DTMF_3, 160)
+                sleep(170)
+                tg.startTone(ToneGenerator.TONE_DTMF_5, 160)
+                sleep(170)
+                tg.startTone(ToneGenerator.TONE_DTMF_8, 500)
+                sleep(510)
+            } finally {
+                tg.release()
+            }
         }.apply { isDaemon = true; start() }
-    }
-
-    private fun playSine(freqHz: Float, durationMs: Int) {
-        try {
-            val sampleRate = 44100
-            val numSamples = (sampleRate * durationMs / 1000)
-            val buf = ShortArray(numSamples)
-            for (i in 0 until numSamples) {
-                val t = i.toFloat() / sampleRate
-                val value = (sin(2.0 * Math.PI * freqHz * t) * Short.MAX_VALUE * 0.55).roundToInt()
-                buf[i] = value.toShort()
-            }
-            val track = AudioTrack(
-                AudioManager.STREAM_NOTIFICATION,
-                sampleRate,
-                AudioFormat.CHANNEL_OUT_MONO,
-                AudioFormat.ENCODING_PCM_16BIT,
-                numSamples * 2,
-                AudioTrack.MODE_STATIC
-            )
-            if (track.state == AudioTrack.STATE_INITIALIZED) {
-                track.write(buf, 0, numSamples)
-                track.play()
-                val deadline = System.currentTimeMillis() + durationMs + 60L
-                while (track.playState == AudioTrack.PLAYSTATE_PLAYING &&
-                    System.currentTimeMillis() < deadline
-                ) {
-                    Thread.sleep(10)
-                }
-                track.stop()
-                track.release()
-            }
-        } catch (_: Exception) { }
     }
 
     @Suppress("SameParameterValue")
