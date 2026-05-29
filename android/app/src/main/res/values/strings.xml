@@ -1,18 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">FocusX</string>
-    <string name="timer_tab">Timer</string>
-    <string name="progress_tab">Progress</string>
-    <string name="tests_tab">Tests</string>
-    <string name="start_focus">Start Focus</string>
-    <string name="pause_session">Pause Session</string>
-    <string name="reset">Reset</string>
-    <string name="todays_study">Today\'s Study</string>
-    <string name="focus_score">Focus Score</string>
-    <string name="minutes">min</string>
-    <string name="settings">Settings</string>
-    <string name="haptic_vibrations">Haptic Vibrations</string>
-    <string name="sound_chimes">Sound Chimes</string>
-    <string name="active_aura_glow">Active Aura Glow</string>
-    <string name="strict_deep_focus">Strict Deep Focus Mode</string>
+    <string name="app_name">StudyZen</string>
 </resources>

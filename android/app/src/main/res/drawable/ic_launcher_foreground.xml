@@ -4,35 +4,19 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Outer ring -->
     <path
-        android:fillColor="@color/premium_violet"
-        android:pathData="M54,24
-            C36.43,24 22,38.43 22,56
-            C22,73.57 36.43,88 54,88
-            C71.57,88 86,73.57 86,56
-            C86,38.43 71.57,24 54,24Z
-            M54,30
-            C68.36,30 80,41.64 80,56
-            C80,70.36 68.36,82 54,82
-            C39.64,82 28,70.36 28,56
-            C28,41.64 39.64,30 54,30Z" />
-    <!-- Inner ring -->
+        android:fillColor="#7C4DFF"
+        android:pathData="M54,30 L54,78 M30,54 L78,54"
+        android:strokeWidth="6"
+        android:strokeColor="#7C4DFF"/>
     <path
-        android:fillColor="#00000000"
-        android:strokeColor="@color/white_primary"
-        android:strokeWidth="2"
-        android:pathData="M54,34
-            C41.85,34 32,43.85 32,56
-            C32,68.15 41.85,78 54,78
-            C66.15,78 76,68.15 76,56
-            C76,43.85 66.15,34 54,34Z" />
-    <!-- Center dot -->
+        android:fillColor="#7C4DFF"
+        android:pathData="M42,54 A12,12 0,1,1 66,54 A12,12 0,1,1 42,54"
+        android:strokeWidth="4"
+        android:strokeColor="#7C4DFF"
+        android:fillAlpha="0.3"/>
     <path
-        android:fillColor="@color/premium_violet"
-        android:pathData="M52,52h4v8h-4z" />
-    <!-- Play triangle -->
-    <path
-        android:fillColor="@color/white_primary"
-        android:pathData="M50,48 L58,56 L50,64Z" />
+        android:pathData="M54,34 L62,48 L46,48 Z"
+        android:fillColor="#F5F7FF"
+        android:strokeWidth="0"/>
 </vector>

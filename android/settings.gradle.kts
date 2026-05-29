@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "FocusX"
+rootProject.name = "StudyZen"
 include(":app")
