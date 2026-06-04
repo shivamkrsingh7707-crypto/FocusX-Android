@@ -1,10 +1,5 @@
 package com.studyzen.app.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Icon
@@ -33,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -41,24 +34,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.studyzen.app.theme.Background
-import com.studyzen.app.theme.Card
-import com.studyzen.app.theme.GlassBorder
-import com.studyzen.app.theme.GlowPurple
-import com.studyzen.app.theme.Primary
-import com.studyzen.app.theme.Secondary
+import com.studyzen.app.theme.AmoledBlack
+import com.studyzen.app.theme.BorderLow
+import com.studyzen.app.theme.CardDark
+import com.studyzen.app.theme.PrimaryPurple
+import com.studyzen.app.theme.TextMuted
 import com.studyzen.app.theme.TextPrimary
 import com.studyzen.app.theme.TextSecondary
-import com.studyzen.app.theme.TextTertiary
 import com.studyzen.app.ui.components.GlassCard
 import com.studyzen.app.ui.components.GlassCardMinimal
-import com.studyzen.app.ui.components.MonthlyLineChart
-import com.studyzen.app.ui.components.PremiumDivider
-import com.studyzen.app.ui.components.WeeklyBarChart
 import com.studyzen.app.viewmodel.StatisticsViewModel
+import androidx.compose.ui.geometry.Size
 
 @Composable
-fun StatisticsScreen(
+fun ProgressScreen(
     statisticsViewModel: StatisticsViewModel
 ) {
     val state by statisticsViewModel.state.collectAsState()
@@ -70,7 +59,7 @@ fun StatisticsScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(AmoledBlack)
     ) {
         Column(
             modifier = Modifier
@@ -81,23 +70,15 @@ fun StatisticsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Statistics",
+                text = "Progress",
                 color = TextPrimary,
-                fontSize = 28.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = (-0.5).sp
-            )
-            Text(
-                text = "Your productivity insights",
-                color = TextSecondary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal,
-                letterSpacing = 0.5.sp
+                letterSpacing = (-0.3).sp
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // Summary cards
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -106,8 +87,8 @@ fun StatisticsScreen(
                     Icon(
                         imageVector = Icons.Filled.AccessTime,
                         contentDescription = null,
-                        tint = Primary,
-                        modifier = Modifier.size(28.dp)
+                        tint = PrimaryPurple,
+                        modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -119,7 +100,7 @@ fun StatisticsScreen(
                     Text(
                         text = formatTotalHours(state.totalMinutes),
                         color = TextPrimary,
-                        fontSize = 24.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -127,8 +108,8 @@ fun StatisticsScreen(
                     Icon(
                         imageVector = Icons.Filled.Timer,
                         contentDescription = null,
-                        tint = Secondary,
-                        modifier = Modifier.size(28.dp)
+                        tint = PrimaryPurple.copy(alpha = 0.7f),
+                        modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -140,7 +121,7 @@ fun StatisticsScreen(
                     Text(
                         text = "${state.totalSessions}",
                         color = TextPrimary,
-                        fontSize = 24.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -148,8 +129,8 @@ fun StatisticsScreen(
                     Icon(
                         imageVector = Icons.Filled.ShowChart,
                         contentDescription = null,
-                        tint = GlowPurple,
-                        modifier = Modifier.size(28.dp)
+                        tint = PrimaryPurple.copy(alpha = 0.5f),
+                        modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -161,60 +142,15 @@ fun StatisticsScreen(
                     Text(
                         text = "${state.averageDailyMinutes.toInt()}m",
                         color = TextPrimary,
-                        fontSize = 24.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // Weekly Chart
             GlassCard {
-                Text(
-                    text = "WEEKLY OVERVIEW",
-                    color = TextSecondary,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = 1.5.sp
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                WeeklyBarChart(
-                    data = state.weeklyStats
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Monthly Chart
-            GlassCard {
-                Text(
-                    text = "MONTHLY TREND",
-                    color = TextSecondary,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                    letterSpacing = 1.5.sp
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                if (state.monthlyStats.isNotEmpty()) {
-                    MonthlyLineChart(
-                        data = state.monthlyStats
-                    )
-                } else {
-                    Text(
-                        text = "No data yet. Start focusing!",
-                        color = TextTertiary,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(vertical = 40.dp).fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Productivity Score
-            GlassCardMinimal {
                 Text(
                     text = "PRODUCTIVITY SCORE",
                     color = TextSecondary,
@@ -230,21 +166,21 @@ fun StatisticsScreen(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(48.dp)
+                            .height(44.dp)
                             .drawBehind {
                                 drawRoundRect(
-                                    color = Card,
+                                    color = CardDark,
                                     cornerRadius = CornerRadius(12.dp.toPx()),
                                     size = size
                                 )
-                                val score = calculateProductivityScore(
+                                val score = calculateScore(
                                     state.totalMinutes,
                                     state.totalSessions,
                                     state.averageDailyMinutes
                                 )
                                 drawRoundRect(
                                     brush = Brush.horizontalGradient(
-                                        colors = listOf(Primary, Secondary)
+                                        colors = listOf(PrimaryPurple, PrimaryPurple.copy(alpha = 0.5f))
                                     ),
                                     cornerRadius = CornerRadius(12.dp.toPx()),
                                     size = Size(
@@ -256,9 +192,9 @@ fun StatisticsScreen(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "${calculateProductivityScore(state.totalMinutes, state.totalSessions, state.averageDailyMinutes)}%",
+                        text = "${calculateScore(state.totalMinutes, state.totalSessions, state.averageDailyMinutes)}%",
                         color = TextPrimary,
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -275,7 +211,7 @@ private fun formatTotalHours(minutes: Int): String {
     return if (hours > 0) "${hours}h ${mins}m" else "${mins}m"
 }
 
-private fun calculateProductivityScore(
+private fun calculateScore(
     totalMinutes: Int,
     totalSessions: Int,
     avgDailyMinutes: Double

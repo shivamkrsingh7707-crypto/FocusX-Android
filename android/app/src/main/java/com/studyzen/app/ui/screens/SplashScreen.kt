@@ -35,9 +35,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.studyzen.app.theme.Background
-import com.studyzen.app.theme.GlowPurple
-import com.studyzen.app.theme.Primary
+import com.studyzen.app.theme.AmoledBlack
+import com.studyzen.app.theme.PrimaryPurple
 import com.studyzen.app.theme.TextPrimary
 import com.studyzen.app.theme.TextSecondary
 import kotlinx.coroutines.delay
@@ -49,8 +48,8 @@ fun SplashScreen(onSplashComplete: () -> Unit) {
 
     val transition = rememberInfiniteTransition(label = "glowPulse")
     val glowAlpha by transition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = 0.7f,
+        initialValue = 0.2f,
+        targetValue = 0.5f,
         animationSpec = infiniteRepeatable(
             animation = tween(2000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
@@ -69,16 +68,16 @@ fun SplashScreen(onSplashComplete: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(AmoledBlack)
             .drawBehind {
                 drawRect(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            GlowPurple.copy(alpha = glowAlpha * 0.3f),
+                            PrimaryPurple.copy(alpha = glowAlpha * 0.2f),
                             Color.Transparent
                         ),
                         center = Offset(size.width / 2, size.height / 2),
-                        radius = size.minDimension * 0.6f
+                        radius = size.minDimension * 0.5f
                     )
                 )
             },
@@ -94,12 +93,12 @@ fun SplashScreen(onSplashComplete: () -> Unit) {
             ) {
                 Box(
                     modifier = Modifier
-                        .size(80.dp)
+                        .size(72.dp)
                         .drawBehind {
                             drawCircle(
                                 brush = Brush.radialGradient(
                                     colors = listOf(
-                                        Primary.copy(alpha = 0.2f),
+                                        PrimaryPurple.copy(alpha = 0.2f),
                                         Color.Transparent
                                     )
                                 ),
@@ -109,20 +108,20 @@ fun SplashScreen(onSplashComplete: () -> Unit) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "SZ",
-                        color = Primary,
-                        fontSize = 36.sp,
+                        text = "FX",
+                        color = PrimaryPurple,
+                        fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 2.sp
                     )
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
-                    text = "StudyZen",
+                    text = "FocusX",
                     color = TextPrimary,
-                    fontSize = 32.sp,
+                    fontSize = 30.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 )
@@ -134,9 +133,9 @@ fun SplashScreen(onSplashComplete: () -> Unit) {
                     enter = fadeIn(animationSpec = tween(600))
                 ) {
                     Text(
-                        text = "Focus. Flow. Achieve.",
+                        text = "Deep Focus. Real Results.",
                         color = TextSecondary,
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Medium,
                         letterSpacing = 4.sp,
                         textAlign = TextAlign.Center

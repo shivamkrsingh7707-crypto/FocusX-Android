@@ -1,19 +1,9 @@
 package com.studyzen.app.ui.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -24,16 +14,17 @@ import androidx.navigation.compose.rememberNavController
 import com.studyzen.app.ui.components.BottomNavBar
 import com.studyzen.app.ui.components.BottomNavItem
 import com.studyzen.app.ui.screens.HomeScreen
-import com.studyzen.app.ui.screens.SettingsScreen
+import com.studyzen.app.ui.screens.ProgressScreen
 import com.studyzen.app.ui.screens.SplashScreen
-import com.studyzen.app.ui.screens.StatisticsScreen
-import com.studyzen.app.ui.screens.StreakScreen
+import com.studyzen.app.ui.screens.TestsScreen
 import com.studyzen.app.viewmodel.PomodoroViewModel
 import com.studyzen.app.viewmodel.StatisticsViewModel
 import com.studyzen.app.viewmodel.StreakViewModel
 
 @Composable
-fun StudyZenNavigation() {
+fun FocusXNavigation(
+    onOpenSettings: () -> Unit
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -50,7 +41,7 @@ fun StudyZenNavigation() {
             if (showBottomBar) {
                 val selectedItem = BottomNavItem.entries.find { it.route == currentRoute }
                 BottomNavBar(
-                    selectedItem = selectedItem ?: BottomNavItem.HOME,
+                    selectedItem = selectedItem ?: BottomNavItem.TIMER,
                     onItemSelected = { item ->
                         if (currentRoute != item.route) {
                             navController.navigate(item.route) {
@@ -69,58 +60,30 @@ fun StudyZenNavigation() {
         NavHost(
             navController = navController,
             startDestination = "splash",
-            modifier = Modifier.padding(paddingValues),
-            enterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { it / 4 },
-                    animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f)
-                ) + fadeIn(animationSpec = tween(300))
-            },
-            exitTransition = {
-                slideOutHorizontally(
-                    targetOffsetX = { -it / 4 },
-                    animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f)
-                ) + fadeOut(animationSpec = tween(200))
-            },
-            popEnterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { -it / 4 },
-                    animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f)
-                ) + fadeIn(animationSpec = tween(300))
-            },
-            popExitTransition = {
-                slideOutHorizontally(
-                    targetOffsetX = { it / 4 },
-                    animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f)
-                ) + fadeOut(animationSpec = tween(200))
-            }
+            modifier = Modifier.padding(paddingValues)
         ) {
             composable("splash") {
                 SplashScreen(
                     onSplashComplete = {
-                        navController.navigate("home") {
+                        navController.navigate("timer") {
                             popUpTo("splash") { inclusive = true }
                         }
                     }
                 )
             }
-            composable("home") {
+            composable("timer") {
                 HomeScreen(
                     pomodoroViewModel = pomodoroViewModel,
-                    streakViewModel = streakViewModel
+                    streakViewModel = streakViewModel,
+                    onOpenSettings = onOpenSettings
                 )
             }
-            composable("streak") {
-                StreakScreen(streakViewModel = streakViewModel)
+            composable("progress") {
+                ProgressScreen(statisticsViewModel = statisticsViewModel)
             }
-            composable("statistics") {
-                StatisticsScreen(statisticsViewModel = statisticsViewModel)
-            }
-            composable("settings") {
-                SettingsScreen()
+            composable("tests") {
+                TestsScreen(streakViewModel = streakViewModel)
             }
         }
     }
 }
-
-

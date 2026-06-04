@@ -101,7 +101,7 @@ fun showStudyReminderNotification(context: Context) {
     val notification = NotificationCompat.Builder(context, CHANNEL_ID)
         .setSmallIcon(android.R.drawable.ic_dialog_info)
         .setContentTitle("Time to Focus!")
-        .setContentText("Your study session is waiting. Stay consistent! 🔥")
+        .setContentText("Your study session is waiting. Stay consistent!")
         .setPriority(NotificationCompat.PRIORITY_HIGH)
         .setContentIntent(pendingIntent)
         .setAutoCancel(true)
@@ -123,7 +123,7 @@ fun showSessionCompleteNotification(context: Context, minutes: Int) {
 
     val notification = NotificationCompat.Builder(context, CHANNEL_ID)
         .setSmallIcon(android.R.drawable.ic_dialog_info)
-        .setContentTitle("Session Complete! 🎉")
+        .setContentTitle("Session Complete!")
         .setContentText("Great focus! You completed $minutes minutes.")
         .setPriority(NotificationCompat.PRIORITY_HIGH)
         .setContentIntent(pendingIntent)

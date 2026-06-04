@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="background">#060816</color>
-    <color name="card">#101528</color>
-    <color name="primary">#7C4DFF</color>
-    <color name="secondary">#4F8CFF</color>
-    <color name="accent_glow">#8B5CF6</color>
-    <color name="text_primary">#F5F7FF</color>
-    <color name="text_secondary">#AAB3C5</color>
-    <color name="splash_background">#060816</color>
+    <color name="amoled_background">#000000</color>
+    <color name="card">#0B0B0D</color>
+    <color name="card_elevated">#121214</color>
+    <color name="primary_purple">#8B5CF6</color>
+    <color name="primary_purple_dim">#6D28D9</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#9CA3AF</color>
+    <color name="text_muted">#6B7280</color>
+    <color name="border_low_opacity">#14FFFFFF</color>
+    <color name="splash_background">#000000</color>
 </resources>

@@ -11,42 +11,42 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val StudyZenColorScheme = darkColorScheme(
-    primary = Primary,
+private val FocusXColorScheme = darkColorScheme(
+    primary = PrimaryPurple,
     onPrimary = Color.White,
-    primaryContainer = PrimaryVariant,
+    primaryContainer = PrimaryPurpleDim,
     onPrimaryContainer = Color.White,
-    secondary = Secondary,
+    secondary = StreakAccent,
     onSecondary = Color.White,
-    secondaryContainer = SecondaryVariant,
+    secondaryContainer = PrimaryPurpleDim.copy(alpha = 0.3f),
     onSecondaryContainer = Color.White,
-    background = Background,
+    background = AmoledBlack,
     onBackground = TextPrimary,
-    surface = Card,
+    surface = CardDark,
     onSurface = TextPrimary,
-    surfaceVariant = CardLight,
+    surfaceVariant = CardElevated,
     onSurfaceVariant = TextSecondary,
-    error = Error,
+    error = ErrorRed,
     onError = Color.White,
-    outline = GlassBorder,
-    outlineVariant = SurfaceOverlay,
+    outline = BorderLow,
+    outlineVariant = BorderMid,
     inverseSurface = Color.White,
-    inverseOnSurface = Background,
-    inversePrimary = Primary
+    inverseOnSurface = AmoledBlack,
+    inversePrimary = PrimaryPurple
 )
 
 @Composable
-fun StudyZenTheme(
+fun FocusXTheme(
     content: @Composable () -> Unit
 ) {
-    val colorScheme = StudyZenColorScheme
+    val colorScheme = FocusXColorScheme
     val view = LocalView.current
 
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = Background.toArgb()
-            window.navigationBarColor = Background.toArgb()
+            window.statusBarColor = AmoledBlack.toArgb()
+            window.navigationBarColor = AmoledBlack.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
             WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = false
         }
@@ -54,7 +54,7 @@ fun StudyZenTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = StudyZenTypography,
+        typography = FocusXTypography,
         content = content
     )
 }

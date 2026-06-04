@@ -44,6 +44,14 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
 
     private var timerJob: Job? = null
 
+    private var onTimerStart: (() -> Unit)? = null
+    private var onTimerPause: (() -> Unit)? = null
+    private var onTimerComplete: (() -> Unit)? = null
+
+    fun setOnStartCallback(cb: () -> Unit) { onTimerStart = cb }
+    fun setOnPauseCallback(cb: () -> Unit) { onTimerPause = cb }
+    fun setOnCompleteCallback(cb: () -> Unit) { onTimerComplete = cb }
+
     fun startTimer() {
         if (_state.value.timerState == TimerState.IDLE) {
             _state.value = _state.value.copy(
@@ -52,6 +60,7 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
                 timerMode = TimerMode.FOCUS,
                 progress = 1f
             )
+            onTimerStart?.invoke()
         }
         startTicking()
     }
@@ -59,6 +68,7 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
     fun pauseTimer() {
         _state.value = _state.value.copy(timerState = TimerState.PAUSED)
         timerJob?.cancel()
+        onTimerPause?.invoke()
     }
 
     fun resumeTimer() {
@@ -95,13 +105,15 @@ class PomodoroViewModel(application: Application) : AndroidViewModel(application
             }
 
             if (_state.value.remainingSeconds <= 0) {
-                onTimerComplete()
+                onTimerCompleteInternal()
             }
         }
     }
 
-    private suspend fun onTimerComplete() {
+    private suspend fun onTimerCompleteInternal() {
         val current = _state.value
+        onTimerComplete?.invoke()
+
         if (current.timerMode == TimerMode.FOCUS) {
             val minutes = current.focusMinutes
             repository.recordSession(minutes)

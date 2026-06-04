@@ -37,7 +37,7 @@ val InterFontFamily = FontFamily(
     )
 )
 
-val StudyZenTypography = Typography(
+val FocusXTypography = Typography(
     displayLarge = TextStyle(
         fontFamily = InterFontFamily,
         fontWeight = FontWeight.Bold,

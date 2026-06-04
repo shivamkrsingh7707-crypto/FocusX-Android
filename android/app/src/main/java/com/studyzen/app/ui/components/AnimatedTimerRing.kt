@@ -19,18 +19,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.studyzen.app.theme.GlowPurple
-import com.studyzen.app.theme.Primary
-import com.studyzen.app.theme.Secondary
+import com.studyzen.app.theme.PrimaryPurple
 import com.studyzen.app.theme.TextPrimary
 import com.studyzen.app.theme.TextSecondary
 
@@ -41,7 +39,7 @@ fun AnimatedTimerRing(
     modeText: String,
     modifier: Modifier = Modifier,
     ringSize: Dp = 220.dp,
-    strokeWidth: Dp = 8.dp
+    strokeWidth: Dp = 4.dp
 ) {
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
@@ -61,43 +59,15 @@ fun AnimatedTimerRing(
             val topLeft = Offset(stroke / 2, stroke / 2)
 
             drawRoundRect(
-                color = Color.White.copy(alpha = 0.06f),
+                color = Color.White.copy(alpha = 0.05f),
                 topLeft = topLeft,
                 size = Size(arcSize, arcSize),
                 cornerRadius = CornerRadius(arcSize / 2),
                 style = Stroke(width = stroke, cap = StrokeCap.Round)
             )
 
-            drawRoundRect(
-                brush = Brush.sweepGradient(
-                    colors = listOf(
-                        Primary,
-                        Secondary,
-                        GlowPurple,
-                        Primary
-                    ),
-                    center = Offset(canvasSize / 2, canvasSize / 2)
-                ),
-                topLeft = topLeft,
-                size = Size(arcSize, arcSize),
-                cornerRadius = CornerRadius(arcSize / 2),
-                style = Stroke(
-                    width = stroke,
-                    cap = StrokeCap.Round
-                ),
-                alpha = 0.8f
-            )
-
             drawArc(
-                brush = Brush.sweepGradient(
-                    colors = listOf(
-                        Primary,
-                        Secondary,
-                        GlowPurple,
-                        Primary
-                    ),
-                    center = Offset(canvasSize / 2, canvasSize / 2)
-                ),
+                color = PrimaryPurple,
                 startAngle = -90f,
                 sweepAngle = 360f * animatedProgress,
                 useCenter = false,
@@ -114,16 +84,17 @@ fun AnimatedTimerRing(
             Text(
                 text = timeText,
                 color = TextPrimary,
-                fontSize = 42.sp,
+                fontSize = 44.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp,
+                fontFamily = FontFamily.Monospace,
+                letterSpacing = 2.sp,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = modeText,
                 color = TextSecondary,
-                fontSize = 13.sp,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 letterSpacing = 2.sp,
                 textAlign = TextAlign.Center
@@ -136,13 +107,7 @@ fun AnimatedTimerRing(
 fun PremiumDivider(modifier: Modifier = Modifier) {
     Canvas(modifier = modifier.fillMaxWidth().height(1.dp).padding(horizontal = 4.dp)) {
         drawLine(
-            brush = Brush.horizontalGradient(
-                colors = listOf(
-                    Color.Transparent,
-                    Color.White.copy(alpha = 0.1f),
-                    Color.Transparent
-                )
-            ),
+            color = Color.White.copy(alpha = 0.08f),
             start = Offset.Zero,
             end = Offset(size.width, 0f),
             strokeWidth = 1f
