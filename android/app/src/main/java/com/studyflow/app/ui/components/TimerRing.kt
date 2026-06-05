@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -48,6 +49,11 @@ fun TimerRing(
             val canvasSize = this.size.minDimension
             val stroke = strokeWidth.toPx()
             val radius = (canvasSize - stroke) / 2
+            val arcSize = Size(radius * 2, radius * 2)
+            val arcOffset = Offset(
+                (this.size.width - arcSize.width) / 2f,
+                (this.size.height - arcSize.height) / 2f
+            )
 
             drawCircle(
                 color = Color.White.copy(alpha = 0.08f),
@@ -56,7 +62,7 @@ fun TimerRing(
                 style = Stroke(width = stroke)
             )
 
-            drawCircle(
+            drawArc(
                 brush = Brush.sweepGradient(
                     colors = listOf(
                         PrimaryBlue,
@@ -64,11 +70,12 @@ fun TimerRing(
                         PrimaryBlue
                     )
                 ),
-                radius = radius,
-                center = Offset(this.size.width / 2f, this.size.height / 2f),
-                style = Stroke(width = stroke, cap = StrokeCap.Round),
                 startAngle = -90f,
-                sweepAngle = 360f * animatedProgress
+                sweepAngle = 360f * animatedProgress,
+                useCenter = false,
+                topLeft = arcOffset,
+                size = arcSize,
+                style = Stroke(width = stroke, cap = StrokeCap.Round)
             )
         }
 
