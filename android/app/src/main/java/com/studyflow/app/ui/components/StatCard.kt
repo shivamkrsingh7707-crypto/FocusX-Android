@@ -22,9 +22,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.studyflow.app.ui.theme.CardDark
-import com.studyflow.app.ui.theme.TextPrimary
-import com.studyflow.app.ui.theme.TextSecondary
+import com.studyflow.app.ui.theme.StudyFlowTheme
 
 @Composable
 fun StatCard(
@@ -34,10 +32,11 @@ fun StatCard(
     value: String,
     modifier: Modifier = Modifier
 ) {
+    val theme = StudyFlowTheme.colors
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(CardDark)
+            .background(theme.surface)
             .padding(16.dp)
     ) {
         Icon(
@@ -49,14 +48,14 @@ fun StatCard(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = label,
-            color = TextSecondary,
+            color = theme.textSecondary,
             fontSize = 11.sp,
             letterSpacing = 0.5.sp
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = value,
-            color = TextPrimary,
+            color = theme.onSurface,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )

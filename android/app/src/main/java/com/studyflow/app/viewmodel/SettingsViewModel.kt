@@ -1,9 +1,12 @@
 package com.studyflow.app.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.content.Context
+import androidx.lifecycle.AndroidViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.studyflow.app.ui.theme.ThemeMode
 
 data class SettingsState(
     val vibrationsEnabled: Boolean = true,
@@ -13,13 +16,32 @@ data class SettingsState(
     val dailyGoalMinutes: Int = 25,
     val reminderEnabled: Boolean = false,
     val reminderHour: Int = 9,
-    val reminderMinute: Int = 0
+    val reminderMinute: Int = 0,
+    val themeMode: ThemeMode = ThemeMode.SYSTEM
 )
 
-class SettingsViewModel : ViewModel() {
+private const val PREFS_NAME = "studyflow_settings"
+private const val KEY_THEME_MODE = "theme_mode"
 
-    private val _state = MutableStateFlow(SettingsState())
+class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+    private val _state = MutableStateFlow(
+        SettingsState(
+            themeMode = loadThemeMode()
+        )
+    )
     val state: StateFlow<SettingsState> = _state.asStateFlow()
+
+    private fun loadThemeMode(): ThemeMode {
+        val ordinal = prefs.getInt(KEY_THEME_MODE, ThemeMode.SYSTEM.ordinal)
+        return ThemeMode.entries.getOrNull(ordinal) ?: ThemeMode.SYSTEM
+    }
+
+    private fun saveThemeMode(mode: ThemeMode) {
+        prefs.edit().putInt(KEY_THEME_MODE, mode.ordinal).apply()
+    }
 
     fun setVibrations(enabled: Boolean) {
         _state.value = _state.value.copy(vibrationsEnabled = enabled)
@@ -47,5 +69,11 @@ class SettingsViewModel : ViewModel() {
             reminderHour = hour,
             reminderMinute = minute
         )
+    }
+
+    fun setThemeMode(mode: ThemeMode) {
+        if (_state.value.themeMode == mode) return
+        _state.value = _state.value.copy(themeMode = mode)
+        saveThemeMode(mode)
     }
 }

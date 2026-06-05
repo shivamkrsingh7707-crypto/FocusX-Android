@@ -32,13 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.studyflow.app.model.SubjectWithStats
-import com.studyflow.app.ui.theme.AmoledBlack
-import com.studyflow.app.ui.theme.CardDark
-import com.studyflow.app.ui.theme.CardElevated
+import com.studyflow.app.ui.theme.StudyFlowTheme
 import com.studyflow.app.ui.theme.SubjectColors
-import com.studyflow.app.ui.theme.TextMuted
-import com.studyflow.app.ui.theme.TextPrimary
-import com.studyflow.app.ui.theme.TextSecondary
 
 private val subjectIcons: Map<String, ImageVector> = mapOf(
     "book" to Icons.Filled.Book,
@@ -56,12 +51,13 @@ fun SubjectCard(
     modifier: Modifier = Modifier
 ) {
     val subjectColor = SubjectColors.getOrElse(subject.colorIndex) { SubjectColors[0] }
+    val theme = StudyFlowTheme.colors
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(if (isSelected) subjectColor.copy(alpha = 0.15f) else CardDark)
+            .background(if (isSelected) subjectColor.copy(alpha = 0.15f) else theme.surface)
             .clickable(onClick = onClick)
             .padding(16.dp)
     ) {
@@ -88,14 +84,14 @@ fun SubjectCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = subject.name,
-                    color = TextPrimary,
+                    color = theme.onSurface,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "${subject.totalMinutes}m studied",
-                    color = TextSecondary,
+                    color = theme.textSecondary,
                     fontSize = 12.sp
                 )
             }
@@ -104,7 +100,7 @@ fun SubjectCard(
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = "${subject.totalMinutes / 60}h / ${subject.targetHoursPerWeek}h",
-                        color = TextMuted,
+                        color = theme.textMuted,
                         fontSize = 12.sp
                     )
                     Spacer(modifier = Modifier.height(4.dp))
@@ -136,11 +132,12 @@ fun AddSubjectCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val theme = StudyFlowTheme.colors
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(CardElevated)
+            .background(theme.surfaceElevated)
             .clickable(onClick = onClick)
             .padding(20.dp),
         contentAlignment = Alignment.Center
@@ -152,13 +149,13 @@ fun AddSubjectCard(
             Icon(
                 imageVector = Icons.Filled.Book,
                 contentDescription = null,
-                tint = TextMuted,
+                tint = theme.textMuted,
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "Add Subject",
-                color = TextMuted,
+                color = theme.textMuted,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium
             )

@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.studyflow.app.model.AppScreen
 import com.studyflow.app.ui.components.BottomNavBar
@@ -23,11 +24,14 @@ import com.studyflow.app.viewmodel.SubjectViewModel
 import com.studyflow.app.viewmodel.TimerViewModel
 
 @Composable
-fun StudyFlowNavigation() {
+fun StudyFlowNavigation(
+    settingsViewModel: SettingsViewModel? = null,
+    onThemeToggle: (Offset) -> Unit = {}
+) {
     val timerViewModel: TimerViewModel = viewModel()
     val subjectViewModel: SubjectViewModel = viewModel()
     val statisticsViewModel: StatisticsViewModel = viewModel()
-    val settingsViewModel: SettingsViewModel = viewModel()
+    val resolvedSettings: SettingsViewModel = settingsViewModel ?: viewModel()
 
     var currentScreen by remember { mutableStateOf(AppScreen.TIMER) }
 
@@ -66,7 +70,8 @@ fun StudyFlowNavigation() {
             }
             AppScreen.SETTINGS -> {
                 SettingsScreen(
-                    settingsViewModel = settingsViewModel
+                    settingsViewModel = resolvedSettings,
+                    onThemeToggle = onThemeToggle
                 )
             }
             }

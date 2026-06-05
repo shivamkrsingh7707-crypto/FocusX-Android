@@ -48,16 +48,9 @@ import androidx.compose.ui.unit.sp
 import com.studyflow.app.model.SubjectWithStats
 import com.studyflow.app.ui.components.AddSubjectCard
 import com.studyflow.app.ui.components.SubjectCard
-import com.studyflow.app.ui.theme.AmoledBlack
-import com.studyflow.app.ui.theme.BorderLow
-import com.studyflow.app.ui.theme.CardDark
-import com.studyflow.app.ui.theme.CardElevated
 import com.studyflow.app.ui.theme.PrimaryBlue
-import com.studyflow.app.ui.theme.PrimaryBlueDim
+import com.studyflow.app.ui.theme.StudyFlowTheme
 import com.studyflow.app.ui.theme.SubjectColors
-import com.studyflow.app.ui.theme.TextMuted
-import com.studyflow.app.ui.theme.TextPrimary
-import com.studyflow.app.ui.theme.TextSecondary
 import com.studyflow.app.viewmodel.SubjectViewModel
 
 @Composable
@@ -65,12 +58,13 @@ fun SubjectsScreen(
     subjectViewModel: SubjectViewModel
 ) {
     val state by subjectViewModel.state.collectAsState()
+    val theme = StudyFlowTheme.colors
     var showDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AmoledBlack)
+            .background(theme.background)
             .padding(horizontal = 20.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
@@ -80,7 +74,7 @@ fun SubjectsScreen(
         ) {
             Text(
                 text = "Subjects",
-                color = TextPrimary,
+                color = theme.onBackground,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -107,13 +101,13 @@ fun SubjectsScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "No subjects yet",
-                        color = TextMuted,
+                        color = theme.textMuted,
                         fontSize = 16.sp
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Add your first subject to start tracking",
-                        color = TextMuted,
+                        color = theme.textMuted,
                         fontSize = 13.sp
                     )
                 }
@@ -154,15 +148,16 @@ fun AddSubjectDialog(
     var name by remember { mutableStateOf("") }
     var selectedColor by remember { mutableIntStateOf(0) }
     var targetHours by remember { mutableFloatStateOf(10f) }
+    val theme = StudyFlowTheme.colors
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = CardElevated,
+        containerColor = theme.surfaceElevated,
         shape = RoundedCornerShape(20.dp),
         title = {
             Text(
                 text = "New Subject",
-                color = TextPrimary,
+                color = theme.onSurface,
                 fontWeight = FontWeight.SemiBold
             )
         },
@@ -175,12 +170,12 @@ fun AddSubjectDialog(
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PrimaryBlue,
-                        unfocusedBorderColor = BorderLow,
+                        unfocusedBorderColor = theme.border,
                         focusedLabelColor = PrimaryBlue,
-                        unfocusedLabelColor = TextMuted,
+                        unfocusedLabelColor = theme.textMuted,
                         cursorColor = PrimaryBlue,
-                        focusedTextColor = TextPrimary,
-                        unfocusedTextColor = TextPrimary
+                        focusedTextColor = theme.onSurface,
+                        unfocusedTextColor = theme.onSurface
                     ),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -190,7 +185,7 @@ fun AddSubjectDialog(
 
                 Text(
                     text = "Color",
-                    color = TextSecondary,
+                    color = theme.textSecondary,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -211,7 +206,7 @@ fun AddSubjectDialog(
                                 Icon(
                                     imageVector = Icons.Filled.Close,
                                     contentDescription = null,
-                                    tint = TextPrimary,
+                                    tint = theme.onSurface,
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
@@ -223,7 +218,7 @@ fun AddSubjectDialog(
 
                 Text(
                     text = "Weekly Target: ${targetHours.toInt()} hours",
-                    color = TextSecondary,
+                    color = theme.textSecondary,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -235,7 +230,7 @@ fun AddSubjectDialog(
                     colors = SliderDefaults.colors(
                         thumbColor = PrimaryBlue,
                         activeTrackColor = PrimaryBlue,
-                        inactiveTrackColor = CardDark
+                        inactiveTrackColor = theme.surface
                     )
                 )
             }
@@ -246,7 +241,7 @@ fun AddSubjectDialog(
                 enabled = name.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = PrimaryBlue,
-                    disabledContainerColor = PrimaryBlueDim.copy(alpha = 0.3f)
+                    disabledContainerColor = PrimaryBlue.copy(alpha = 0.3f)
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -255,7 +250,7 @@ fun AddSubjectDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel", color = TextMuted)
+                Text("Cancel", color = theme.textMuted)
             }
         }
     )

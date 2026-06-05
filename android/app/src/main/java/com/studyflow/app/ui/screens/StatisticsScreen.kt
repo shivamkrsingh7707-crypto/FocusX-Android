@@ -34,14 +34,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.studyflow.app.ui.components.StatCard
-import com.studyflow.app.ui.theme.AmoledBlack
-import com.studyflow.app.ui.theme.BorderLow
-import com.studyflow.app.ui.theme.CardDark
 import com.studyflow.app.ui.theme.PrimaryBlue
+import com.studyflow.app.ui.theme.StudyFlowTheme
 import com.studyflow.app.ui.theme.SuccessGreen
-import com.studyflow.app.ui.theme.TextMuted
-import com.studyflow.app.ui.theme.TextPrimary
-import com.studyflow.app.ui.theme.TextSecondary
 import com.studyflow.app.ui.theme.WarningAmber
 import com.studyflow.app.viewmodel.StatisticsViewModel
 
@@ -50,6 +45,7 @@ fun StatisticsScreen(
     statisticsViewModel: StatisticsViewModel
 ) {
     val state by statisticsViewModel.state.collectAsState()
+    val theme = StudyFlowTheme.colors
 
     LaunchedEffect(Unit) {
         statisticsViewModel.refresh()
@@ -58,7 +54,7 @@ fun StatisticsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AmoledBlack)
+            .background(theme.background)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
     ) {
@@ -66,7 +62,7 @@ fun StatisticsScreen(
 
         Text(
             text = "Statistics",
-            color = TextPrimary,
+            color = theme.onBackground,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
@@ -104,7 +100,7 @@ fun StatisticsScreen(
 
         Text(
             text = "THIS WEEK",
-            color = TextMuted,
+            color = theme.textMuted,
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium,
             letterSpacing = 1.5.sp
@@ -115,20 +111,20 @@ fun StatisticsScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(CardDark, RoundedCornerShape(20.dp))
+                .background(theme.surface, RoundedCornerShape(20.dp))
                 .padding(20.dp)
         ) {
             Column {
                 Text(
                     text = "${state.weeklyTotal} min",
-                    color = TextPrimary,
+                    color = theme.onSurface,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Total this week",
-                    color = TextSecondary,
+                    color = theme.textSecondary,
                     fontSize = 13.sp
                 )
 
@@ -155,14 +151,14 @@ fun StatisticsScreen(
                                     )
                                     .background(
                                         if (day.minutes > 0) PrimaryBlue.copy(alpha = 0.6f)
-                                        else BorderLow,
+                                        else theme.border,
                                         RoundedCornerShape(4.dp)
                                     )
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = day.dayLabel,
-                                color = if (day.isToday) PrimaryBlue else TextMuted,
+                                color = if (day.isToday) PrimaryBlue else theme.textMuted,
                                 fontSize = 11.sp,
                                 fontWeight = if (day.isToday) FontWeight.SemiBold else FontWeight.Normal
                             )
@@ -176,7 +172,7 @@ fun StatisticsScreen(
 
         Text(
             text = "ACHIEVEMENTS",
-            color = TextMuted,
+            color = theme.textMuted,
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium,
             letterSpacing = 1.5.sp

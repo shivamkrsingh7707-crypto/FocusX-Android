@@ -19,9 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.studyflow.app.ui.theme.AmoledBlack
 import com.studyflow.app.ui.theme.PrimaryBlue
-import com.studyflow.app.ui.theme.TextPrimary
+import com.studyflow.app.ui.theme.StudyFlowTheme
 
 @Composable
 fun TimerRing(
@@ -81,7 +80,7 @@ fun TimerRing(
 
         Text(
             text = timeText,
-            color = TextPrimary,
+            color = StudyFlowTheme.colors.onSurface,
             fontSize = 42.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = (-1).sp

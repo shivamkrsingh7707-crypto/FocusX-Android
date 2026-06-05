@@ -42,16 +42,10 @@ import com.studyflow.app.model.TimerMode
 import com.studyflow.app.model.TimerState
 import com.studyflow.app.model.defaultPresets
 import com.studyflow.app.ui.components.TimerRing
-import com.studyflow.app.ui.theme.AmoledBlack
 import com.studyflow.app.ui.theme.AccentTeal
-import com.studyflow.app.ui.theme.BorderLow
-import com.studyflow.app.ui.theme.CardDark
-import com.studyflow.app.ui.theme.CardElevated
 import com.studyflow.app.ui.theme.PrimaryBlue
+import com.studyflow.app.ui.theme.StudyFlowTheme
 import com.studyflow.app.ui.theme.SuccessGreen
-import com.studyflow.app.ui.theme.TextMuted
-import com.studyflow.app.ui.theme.TextPrimary
-import com.studyflow.app.ui.theme.TextSecondary
 import com.studyflow.app.ui.theme.WarningAmber
 import com.studyflow.app.viewmodel.TimerViewModel
 
@@ -60,11 +54,12 @@ fun TimerScreen(
     timerViewModel: TimerViewModel
 ) {
     val state by timerViewModel.state.collectAsState()
+    val theme = StudyFlowTheme.colors
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AmoledBlack)
+            .background(theme.background)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -77,7 +72,7 @@ fun TimerScreen(
         ) {
             Text(
                 text = "Timer",
-                color = TextPrimary,
+                color = theme.onBackground,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -88,7 +83,7 @@ fun TimerScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(CardDark, RoundedCornerShape(24.dp))
+                .background(theme.surface, RoundedCornerShape(24.dp))
                 .padding(32.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -239,7 +234,7 @@ fun TimerScreen(
                             Icon(
                                 imageVector = Icons.Filled.Refresh,
                                 contentDescription = "Reset",
-                                tint = TextMuted,
+                                tint = theme.textMuted,
                                 modifier = Modifier.size(22.dp)
                             )
                         }
@@ -250,7 +245,7 @@ fun TimerScreen(
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = "${state.sessionsCompleted} session(s) completed today",
-                        color = TextSecondary,
+                        color = theme.textSecondary,
                         fontSize = 12.sp
                     )
                 }
@@ -262,7 +257,7 @@ fun TimerScreen(
 
             Text(
                 text = "QUICK PRESETS",
-                color = TextMuted,
+                color = theme.textMuted,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
                 letterSpacing = 1.5.sp
@@ -278,20 +273,20 @@ fun TimerScreen(
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(CardElevated)
+                            .background(theme.surfaceElevated)
                             .padding(vertical = 10.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = "${preset.focusMinutes}m",
-                                color = TextPrimary,
+                                color = theme.onSurface,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
                                 text = preset.label,
-                                color = TextMuted,
+                                color = theme.textMuted,
                                 fontSize = 10.sp
                             )
                         }
@@ -303,7 +298,7 @@ fun TimerScreen(
 
             Text(
                 text = "CUSTOMIZE",
-                color = TextMuted,
+                color = theme.textMuted,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
                 letterSpacing = 1.5.sp
@@ -314,14 +309,14 @@ fun TimerScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .background(CardDark)
+                    .background(theme.surface)
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "Focus",
-                        color = TextSecondary,
+                        color = theme.textSecondary,
                         fontSize = 12.sp
                     )
                     Spacer(modifier = Modifier.height(6.dp))
@@ -333,11 +328,11 @@ fun TimerScreen(
                             },
                             modifier = Modifier.size(32.dp)
                         ) {
-                            Text("-", color = TextPrimary, fontSize = 18.sp)
+                            Text("-", color = theme.onSurface, fontSize = 18.sp)
                         }
                         Text(
                             text = "${state.focusMinutes}",
-                            color = TextPrimary,
+                            color = theme.onSurface,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 12.dp)
@@ -349,14 +344,14 @@ fun TimerScreen(
                             },
                             modifier = Modifier.size(32.dp)
                         ) {
-                            Text("+", color = TextPrimary, fontSize = 18.sp)
+                            Text("+", color = theme.onSurface, fontSize = 18.sp)
                         }
                     }
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "Break",
-                        color = TextSecondary,
+                        color = theme.textSecondary,
                         fontSize = 12.sp
                     )
                     Spacer(modifier = Modifier.height(6.dp))
@@ -368,11 +363,11 @@ fun TimerScreen(
                             },
                             modifier = Modifier.size(32.dp)
                         ) {
-                            Text("-", color = TextPrimary, fontSize = 18.sp)
+                            Text("-", color = theme.onSurface, fontSize = 18.sp)
                         }
                         Text(
                             text = "${state.breakMinutes}",
-                            color = TextPrimary,
+                            color = theme.onSurface,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 12.dp)
@@ -384,7 +379,7 @@ fun TimerScreen(
                             },
                             modifier = Modifier.size(32.dp)
                         ) {
-                            Text("+", color = TextPrimary, fontSize = 18.sp)
+                            Text("+", color = theme.onSurface, fontSize = 18.sp)
                         }
                     }
                 }

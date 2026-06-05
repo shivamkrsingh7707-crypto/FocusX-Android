@@ -34,10 +34,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.studyflow.app.model.AppScreen
-import com.studyflow.app.ui.theme.AmoledBlack
 import com.studyflow.app.ui.theme.PrimaryBlue
-import com.studyflow.app.ui.theme.TextMuted
-import com.studyflow.app.ui.theme.TextPrimary
+import com.studyflow.app.ui.theme.StudyFlowTheme
 
 data class BottomNavItem(
     val screen: AppScreen,
@@ -60,10 +58,11 @@ fun BottomNavBar(
     onScreenSelected: (AppScreen) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val theme = StudyFlowTheme.colors
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(AmoledBlack)
+            .background(theme.background)
             .padding(horizontal = 8.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
@@ -71,7 +70,7 @@ fun BottomNavBar(
         bottomNavItems.forEach { item ->
             val isSelected = item.screen == selectedScreen
             val iconColor by animateColorAsState(
-                targetValue = if (isSelected) PrimaryBlue else TextMuted,
+                targetValue = if (isSelected) PrimaryBlue else theme.textMuted,
                 animationSpec = tween(200),
                 label = "navColor"
             )

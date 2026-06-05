@@ -1,6 +1,9 @@
 package com.studyflow.app.ui.screens
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Icon
@@ -26,18 +30,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.studyflow.app.ui.components.StatCard
-import com.studyflow.app.ui.theme.AmoledBlack
-import com.studyflow.app.ui.theme.BorderLow
-import com.studyflow.app.ui.theme.CardDark
 import com.studyflow.app.ui.theme.PrimaryBlue
+import com.studyflow.app.ui.theme.StudyFlowTheme
 import com.studyflow.app.ui.theme.SuccessGreen
-import com.studyflow.app.ui.theme.TextMuted
-import com.studyflow.app.ui.theme.TextPrimary
-import com.studyflow.app.ui.theme.TextSecondary
 import com.studyflow.app.ui.theme.WarningAmber
 import com.studyflow.app.viewmodel.StatisticsViewModel
 import com.studyflow.app.viewmodel.SubjectViewModel
@@ -53,11 +53,12 @@ fun DashboardScreen(
     val timerState by timerViewModel.state.collectAsState()
     val subjectState by subjectViewModel.state.collectAsState()
     val statsState by statisticsViewModel.state.collectAsState()
+    val theme = StudyFlowTheme.colors
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AmoledBlack)
+            .background(theme.background)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
     ) {
@@ -70,14 +71,14 @@ fun DashboardScreen(
             Column {
                 Text(
                     text = "StudyFlow",
-                    color = TextPrimary,
+                    color = theme.onBackground,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = (-0.5).sp
                 )
                 Text(
                     text = "Stay in the flow",
-                    color = TextSecondary,
+                    color = theme.textSecondary,
                     fontSize = 13.sp
                 )
             }
@@ -88,13 +89,13 @@ fun DashboardScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(CardDark, RoundedCornerShape(20.dp))
+                .background(theme.surface, RoundedCornerShape(20.dp))
                 .padding(20.dp)
         ) {
             Column {
                 Text(
                     text = "TODAY'S FOCUS",
-                    color = TextMuted,
+                    color = theme.textMuted,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
                     letterSpacing = 1.5.sp
@@ -112,7 +113,7 @@ fun DashboardScreen(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "sessions",
-                        color = TextSecondary,
+                        color = theme.textSecondary,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(bottom = 6.dp)
@@ -123,54 +124,18 @@ fun DashboardScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "${timerState.totalFocusMinutes} total minutes focused",
-                        color = TextSecondary,
+                        color = theme.textSecondary,
                         fontSize = 12.sp
                     )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            PrimaryBlue.copy(alpha = 0.15f),
-                            RoundedCornerShape(12.dp)
-                        )
-                        .padding(14.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = "Timer",
-                                color = TextPrimary,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(
-                                text = "${timerState.focusMinutes} min focus / ${timerState.breakMinutes} min break",
-                                color = TextSecondary,
-                                fontSize = 11.sp
-                            )
-                        }
-                        Text(
-                            text = "Tap to start →",
-                            color = PrimaryBlue,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier
-                                .background(
-                                    PrimaryBlue.copy(alpha = 0.2f),
-                                    RoundedCornerShape(8.dp)
-                                )
-                                .padding(horizontal = 12.dp, vertical = 6.dp)
-                        )
-                    }
-                }
+                StartTimerCard(
+                    focusMinutes = timerState.focusMinutes,
+                    breakMinutes = timerState.breakMinutes,
+                    onClick = onStartTimer
+                )
             }
         }
 
@@ -178,7 +143,7 @@ fun DashboardScreen(
 
         Text(
             text = "OVERVIEW",
-            color = TextMuted,
+            color = theme.textMuted,
             fontSize = 11.sp,
             fontWeight = FontWeight.Medium,
             letterSpacing = 1.5.sp
@@ -218,7 +183,7 @@ fun DashboardScreen(
         if (subjectState.subjects.isNotEmpty()) {
             Text(
                 text = "YOUR SUBJECTS",
-                color = TextMuted,
+                color = theme.textMuted,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
                 letterSpacing = 1.5.sp
@@ -234,6 +199,73 @@ fun DashboardScreen(
         }
 
         Spacer(modifier = Modifier.height(100.dp))
+    }
+}
+
+@Composable
+private fun StartTimerCard(
+    focusMinutes: Int,
+    breakMinutes: Int,
+    onClick: () -> Unit
+) {
+    val theme = StudyFlowTheme.colors
+    val pressedOffsetY by animateDpAsState(
+        targetValue = 0.dp,
+        animationSpec = spring(stiffness = 400f, dampingRatio = 0.6f),
+        label = "press"
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(PrimaryBlue.copy(alpha = 0.15f))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(PrimaryBlue.copy(alpha = 0.25f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.PlayArrow,
+                    contentDescription = null,
+                    tint = PrimaryBlue,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Start focus session",
+                    color = theme.onSurface,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = "$focusMinutes min focus / $breakMinutes min break",
+                    color = theme.textSecondary,
+                    fontSize = 12.sp
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Start",
+                color = PrimaryBlue,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(PrimaryBlue.copy(alpha = 0.25f))
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
+            )
+        }
     }
 }
 
