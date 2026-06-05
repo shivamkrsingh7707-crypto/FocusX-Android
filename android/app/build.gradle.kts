@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.studyzen.app"
+    namespace = "com.studyflow.app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.studyzen.app"
+        applicationId = "com.studyflow.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
