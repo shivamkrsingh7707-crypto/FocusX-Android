@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import kotlin.math.hypot
 
 private const val RevealDurationMs = 700
-private const val HoldDurationMs = 180
+private const val HoldDurationMs = 180L
 
 /**
  * Cute corner-to-full theme transition.
