@@ -1,5 +1,8 @@
 package com.studyflow.app.model
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class SubjectWithStats(
     val id: Long,
     val name: String,
@@ -10,6 +13,7 @@ data class SubjectWithStats(
     val targetHoursPerWeek: Int
 )
 
+@Immutable
 data class WeeklyDay(
     val dayLabel: String,
     val date: String,
@@ -17,6 +21,7 @@ data class WeeklyDay(
     val isToday: Boolean = false
 )
 
+@Immutable
 data class TimerPreset(
     val label: String,
     val focusMinutes: Int,
@@ -34,6 +39,7 @@ val defaultPresets = listOf(
 enum class TimerState { IDLE, RUNNING, PAUSED, COMPLETED }
 enum class TimerMode { FOCUS, BREAK }
 
+@Immutable
 data class PomodoroState(
     val timerState: TimerState = TimerState.IDLE,
     val timerMode: TimerMode = TimerMode.FOCUS,

@@ -1,7 +1,5 @@
 package com.studyflow.app.ui.screens
 
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,7 +24,6 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +31,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.studyflow.app.model.TimerState
 import com.studyflow.app.ui.components.StatCard
 import com.studyflow.app.ui.theme.PrimaryBlue
 import com.studyflow.app.ui.theme.StudyFlowTheme
@@ -50,9 +49,9 @@ fun DashboardScreen(
     statisticsViewModel: StatisticsViewModel,
     onStartTimer: () -> Unit
 ) {
-    val timerState by timerViewModel.state.collectAsState()
-    val subjectState by subjectViewModel.state.collectAsState()
-    val statsState by statisticsViewModel.state.collectAsState()
+    val timerState by timerViewModel.state.collectAsStateWithLifecycle()
+    val subjectState by subjectViewModel.state.collectAsStateWithLifecycle()
+    val statsState by statisticsViewModel.state.collectAsStateWithLifecycle()
     val theme = StudyFlowTheme.colors
 
     Column(
@@ -131,11 +130,17 @@ fun DashboardScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                StartTimerCard(
-                    focusMinutes = timerState.focusMinutes,
-                    breakMinutes = timerState.breakMinutes,
-                    onClick = onStartTimer
-                )
+                when (timerState.timerState) {
+                    TimerState.PAUSED -> ContinueSessionCard(
+                        remainingSeconds = timerState.remainingSeconds,
+                        onClick = onStartTimer
+                    )
+                    else -> StartTimerCard(
+                        focusMinutes = timerState.focusMinutes,
+                        breakMinutes = timerState.breakMinutes,
+                        onClick = onStartTimer
+                    )
+                }
             }
         }
 
@@ -209,11 +214,6 @@ private fun StartTimerCard(
     onClick: () -> Unit
 ) {
     val theme = StudyFlowTheme.colors
-    val pressedOffsetY by animateDpAsState(
-        targetValue = 0.dp,
-        animationSpec = spring(stiffness = 400f, dampingRatio = 0.6f),
-        label = "press"
-    )
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -263,6 +263,70 @@ private fun StartTimerCard(
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
                     .background(PrimaryBlue.copy(alpha = 0.25f))
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ContinueSessionCard(
+    remainingSeconds: Int,
+    onClick: () -> Unit
+) {
+    val theme = StudyFlowTheme.colors
+    val minutes = remainingSeconds / 60
+    val seconds = remainingSeconds % 60
+    val timeText = String.format("%02d:%02d", minutes, seconds)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(SuccessGreen.copy(alpha = 0.18f))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(SuccessGreen.copy(alpha = 0.3f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.PlayArrow,
+                    contentDescription = null,
+                    tint = SuccessGreen,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Session paused",
+                    color = theme.onSurface,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = "$timeText remaining",
+                    color = theme.textSecondary,
+                    fontSize = 12.sp
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Continue",
+                color = SuccessGreen,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(SuccessGreen.copy(alpha = 0.3f))
                     .padding(horizontal = 14.dp, vertical = 8.dp)
             )
         }

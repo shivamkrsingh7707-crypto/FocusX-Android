@@ -2,12 +2,15 @@ package com.studyflow.app.viewmodel
 
 import android.app.Application
 import android.content.Context
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.AndroidViewModel
+import com.studyflow.app.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import com.studyflow.app.ui.theme.ThemeMode
+import kotlinx.coroutines.flow.update
 
+@Immutable
 data class SettingsState(
     val vibrationsEnabled: Boolean = true,
     val soundEnabled: Boolean = true,
@@ -27,53 +30,31 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     private val prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    private val _state = MutableStateFlow(
-        SettingsState(
-            themeMode = loadThemeMode()
-        )
-    )
+    private val _state = MutableStateFlow(SettingsState(themeMode = loadThemeMode()))
     val state: StateFlow<SettingsState> = _state.asStateFlow()
 
-    private fun loadThemeMode(): ThemeMode {
-        val ordinal = prefs.getInt(KEY_THEME_MODE, ThemeMode.SYSTEM.ordinal)
-        return ThemeMode.entries.getOrNull(ordinal) ?: ThemeMode.SYSTEM
-    }
+    fun setVibrations(enabled: Boolean) = update { copy(vibrationsEnabled = enabled) }
+    fun setSound(enabled: Boolean) = update { copy(soundEnabled = enabled) }
+    fun setAutoStartBreaks(enabled: Boolean) = update { copy(autoStartBreaks = enabled) }
+    fun setAutoStartFocus(enabled: Boolean) = update { copy(autoStartFocus = enabled) }
+    fun setDailyGoal(minutes: Int) = update { copy(dailyGoalMinutes = minutes) }
 
-    private fun saveThemeMode(mode: ThemeMode) {
-        prefs.edit().putInt(KEY_THEME_MODE, mode.ordinal).apply()
-    }
-
-    fun setVibrations(enabled: Boolean) {
-        _state.value = _state.value.copy(vibrationsEnabled = enabled)
-    }
-
-    fun setSound(enabled: Boolean) {
-        _state.value = _state.value.copy(soundEnabled = enabled)
-    }
-
-    fun setAutoStartBreaks(enabled: Boolean) {
-        _state.value = _state.value.copy(autoStartBreaks = enabled)
-    }
-
-    fun setAutoStartFocus(enabled: Boolean) {
-        _state.value = _state.value.copy(autoStartFocus = enabled)
-    }
-
-    fun setDailyGoal(minutes: Int) {
-        _state.value = _state.value.copy(dailyGoalMinutes = minutes)
-    }
-
-    fun setReminder(enabled: Boolean, hour: Int = 9, minute: Int = 0) {
-        _state.value = _state.value.copy(
-            reminderEnabled = enabled,
-            reminderHour = hour,
-            reminderMinute = minute
-        )
+    fun setReminder(enabled: Boolean, hour: Int = 9, minute: Int = 0) = update {
+        copy(reminderEnabled = enabled, reminderHour = hour, reminderMinute = minute)
     }
 
     fun setThemeMode(mode: ThemeMode) {
         if (_state.value.themeMode == mode) return
-        _state.value = _state.value.copy(themeMode = mode)
-        saveThemeMode(mode)
+        _state.update { it.copy(themeMode = mode) }
+        prefs.edit().putInt(KEY_THEME_MODE, mode.ordinal).apply()
+    }
+
+    private inline fun update(transform: SettingsState.() -> SettingsState) {
+        _state.update(transform)
+    }
+
+    private fun loadThemeMode(): ThemeMode {
+        val ordinal = prefs.getInt(KEY_THEME_MODE, ThemeMode.SYSTEM.ordinal)
+        return ThemeMode.entries.getOrNull(ordinal) ?: ThemeMode.SYSTEM
     }
 }

@@ -1,6 +1,7 @@
 package com.studyflow.app.viewmodel
 
 import android.app.Application
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.studyflow.app.data.database.StudyFlowDatabase
@@ -10,9 +11,12 @@ import com.studyflow.app.model.SubjectWithStats
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@Immutable
 data class SubjectListState(
     val subjects: List<SubjectWithStats> = emptyList(),
     val isLoading: Boolean = true
@@ -31,7 +35,7 @@ class SubjectViewModel(application: Application) : AndroidViewModel(application)
 
     init {
         viewModelScope.launch {
-            repository.allSubjects.collect { subjects ->
+            repository.allSubjects.collectLatest { subjects ->
                 buildSubjectStats(subjects)
             }
         }
@@ -50,10 +54,9 @@ class SubjectViewModel(application: Application) : AndroidViewModel(application)
                 targetHoursPerWeek = subject.targetHoursPerWeek
             )
         }
-        _state.value = SubjectListState(
-            subjects = statsList,
-            isLoading = false
-        )
+        _state.update {
+            it.copy(subjects = statsList, isLoading = false)
+        }
     }
 
     fun addSubject(name: String, colorIndex: Int, targetHours: Int) {
@@ -69,9 +72,7 @@ class SubjectViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun updateSubject(subject: SubjectEntity) {
-        viewModelScope.launch {
-            repository.updateSubject(subject)
-        }
+        viewModelScope.launch { repository.updateSubject(subject) }
     }
 
     fun deleteSubject(subject: SubjectWithStats) {
@@ -87,11 +88,7 @@ class SubjectViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun archiveSubject(id: Long) {
-        viewModelScope.launch {
-            repository.deleteSubject(
-                SubjectEntity(id = id, name = "")
-            )
-        }
+        viewModelScope.launch { repository.deleteSubject(SubjectEntity(id = id, name = "")) }
     }
 
     fun refresh() {

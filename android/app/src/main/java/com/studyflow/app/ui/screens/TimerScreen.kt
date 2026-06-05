@@ -30,8 +30,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,7 +53,7 @@ import com.studyflow.app.viewmodel.TimerViewModel
 fun TimerScreen(
     timerViewModel: TimerViewModel
 ) {
-    val state by timerViewModel.state.collectAsState()
+    val state by timerViewModel.state.collectAsStateWithLifecycle()
     val theme = StudyFlowTheme.colors
 
     Column(
@@ -193,7 +193,7 @@ fun TimerScreen(
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = "Resume",
+                                    text = "Continue",
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )

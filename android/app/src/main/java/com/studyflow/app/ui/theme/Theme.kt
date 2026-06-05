@@ -1,18 +1,17 @@
 package com.studyflow.app.ui.theme
 
 import android.app.Activity
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
@@ -20,6 +19,7 @@ import androidx.core.view.WindowCompat
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
+@Immutable
 data class StudyFlowColors(
     val background: Color,
     val surface: Color,
@@ -59,7 +59,7 @@ private val LightStudyFlowColors = StudyFlowColors(
     borderMid = LightBorderMid
 )
 
-val LocalStudyFlowColors = compositionLocalOf { DarkStudyFlowColors }
+val LocalStudyFlowColors = staticCompositionLocalOf { DarkStudyFlowColors }
 
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryBlue,
@@ -109,8 +109,11 @@ private val LightColorScheme = lightColorScheme(
     inversePrimary = PrimaryBlueLight
 )
 
-private const val ThemeAnimDurationMs = 350
-
+/**
+ * The theme transition is owned by [ThemeRevealOverlay]; the tokens themselves
+ * snap so the UI doesn't try to animate two things at once (which is what was
+ * causing the stutter on slower devices).
+ */
 @Composable
 fun StudyFlowTheme(
     themeMode: ThemeMode = ThemeMode.SYSTEM,
@@ -123,52 +126,26 @@ fun StudyFlowTheme(
         ThemeMode.DARK -> true
     }
 
-    val targetColors = if (targetDark) DarkStudyFlowColors else LightStudyFlowColors
-    val targetScheme = if (targetDark) DarkColorScheme else LightColorScheme
-
-    // Animate each token so the whole UI smoothly crossfades between themes.
-    val animSpec = tween<Color>(ThemeAnimDurationMs)
-    val background by animateColorAsState(targetColors.background, animSpec, label = "bg")
-    val surface by animateColorAsState(targetColors.surface, animSpec, label = "surface")
-    val surfaceElevated by animateColorAsState(targetColors.surfaceElevated, animSpec, label = "surfaceElevated")
-    val surfaceDim by animateColorAsState(targetColors.surfaceDim, animSpec, label = "surfaceDim")
-    val onBackground by animateColorAsState(targetColors.onBackground, animSpec, label = "onBg")
-    val onSurface by animateColorAsState(targetColors.onSurface, animSpec, label = "onSurface")
-    val textSecondary by animateColorAsState(targetColors.textSecondary, animSpec, label = "textSec")
-    val textMuted by animateColorAsState(targetColors.textMuted, animSpec, label = "textMuted")
-    val border by animateColorAsState(targetColors.border, animSpec, label = "border")
-    val borderMid by animateColorAsState(targetColors.borderMid, animSpec, label = "borderMid")
-
-    val animatedTokens = StudyFlowColors(
-        background = background,
-        surface = surface,
-        surfaceElevated = surfaceElevated,
-        surfaceDim = surfaceDim,
-        onBackground = onBackground,
-        onSurface = onSurface,
-        textSecondary = textSecondary,
-        textMuted = textMuted,
-        border = border,
-        borderMid = borderMid
-    )
+    val tokens: StudyFlowColors = if (targetDark) DarkStudyFlowColors else LightStudyFlowColors
+    val scheme = if (targetDark) DarkColorScheme else LightColorScheme
 
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
             @Suppress("DEPRECATION")
-            window.statusBarColor = animatedTokens.background.toArgb()
+            window.statusBarColor = tokens.background.toArgb()
             @Suppress("DEPRECATION")
-            window.navigationBarColor = animatedTokens.background.toArgb()
+            window.navigationBarColor = tokens.background.toArgb()
             val controller = WindowCompat.getInsetsController(window, view)
             controller.isAppearanceLightStatusBars = !targetDark
             controller.isAppearanceLightNavigationBars = !targetDark
         }
     }
 
-    CompositionLocalProvider(LocalStudyFlowColors provides animatedTokens) {
+    CompositionLocalProvider(LocalStudyFlowColors provides tokens) {
         MaterialTheme(
-            colorScheme = targetScheme,
+            colorScheme = scheme,
             typography = StudyFlowTypography,
             content = content
         )

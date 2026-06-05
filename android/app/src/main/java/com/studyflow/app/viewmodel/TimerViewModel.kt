@@ -14,6 +14,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class TimerViewModel(application: Application) : AndroidViewModel(application) {
@@ -35,49 +36,53 @@ class TimerViewModel(application: Application) : AndroidViewModel(application) {
 
     fun startTimer() {
         if (_state.value.timerState == TimerState.IDLE) {
-            _state.value = _state.value.copy(
-                remainingSeconds = _state.value.focusMinutes * 60,
-                timerState = TimerState.RUNNING,
-                timerMode = TimerMode.FOCUS,
-                progress = 1f
-            )
+            _state.update {
+                it.copy(
+                    remainingSeconds = it.focusMinutes * 60,
+                    timerState = TimerState.RUNNING,
+                    timerMode = TimerMode.FOCUS,
+                    progress = 1f
+                )
+            }
             onTimerStart?.invoke()
         }
         startTicking()
     }
 
     fun pauseTimer() {
-        _state.value = _state.value.copy(timerState = TimerState.PAUSED)
+        _state.update { it.copy(timerState = TimerState.PAUSED) }
         timerJob?.cancel()
         onTimerPause?.invoke()
     }
 
     fun resumeTimer() {
-        _state.value = _state.value.copy(timerState = TimerState.RUNNING)
+        _state.update { it.copy(timerState = TimerState.RUNNING) }
         startTicking()
     }
 
     fun resetTimer() {
         timerJob?.cancel()
         val focusMin = _state.value.focusMinutes
-        _state.value = _state.value.copy(
-            timerState = TimerState.IDLE,
-            timerMode = TimerMode.FOCUS,
-            remainingSeconds = focusMin * 60,
-            progress = 1f,
-            activeSubjectId = null
-        )
+        _state.update {
+            it.copy(
+                timerState = TimerState.IDLE,
+                timerMode = TimerMode.FOCUS,
+                remainingSeconds = focusMin * 60,
+                progress = 1f,
+                activeSubjectId = null
+            )
+        }
     }
 
     private fun startTicking() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch(Dispatchers.Default) {
             while (_state.value.remainingSeconds > 0 && _state.value.timerState == TimerState.RUNNING) {
-                delay(1000L)
+                delay(TICK_INTERVAL_MS)
                 val current = _state.value
                 val newRemaining = current.remainingSeconds - 1
                 val totalSeconds = if (current.timerMode == TimerMode.FOCUS)
-                    current.focusMinutes * 60 else current.breakMinutes * 60
+                    current.focusMinutes * SECONDS_PER_MINUTE else current.breakMinutes * SECONDS_PER_MINUTE
                 val newProgress = newRemaining.toFloat() / totalSeconds
 
                 _state.value = current.copy(
@@ -106,7 +111,7 @@ class TimerViewModel(application: Application) : AndroidViewModel(application) {
             _state.value = current.copy(
                 timerState = TimerState.COMPLETED,
                 timerMode = TimerMode.BREAK,
-                remainingSeconds = current.breakMinutes * 60,
+                remainingSeconds = current.breakMinutes * SECONDS_PER_MINUTE,
                 totalFocusMinutes = newTotal,
                 sessionsCompleted = newSessions,
                 progress = 1f
@@ -115,40 +120,40 @@ class TimerViewModel(application: Application) : AndroidViewModel(application) {
             _state.value = current.copy(
                 timerState = TimerState.COMPLETED,
                 timerMode = TimerMode.FOCUS,
-                remainingSeconds = current.focusMinutes * 60,
+                remainingSeconds = current.focusMinutes * SECONDS_PER_MINUTE,
                 progress = 1f
             )
         }
     }
 
     fun setFocusMinutes(minutes: Int) {
-        if (_state.value.timerState == TimerState.IDLE) {
-            _state.value = _state.value.copy(
+        if (_state.value.timerState != TimerState.IDLE) return
+        _state.update {
+            it.copy(
                 focusMinutes = minutes,
-                remainingSeconds = minutes * 60,
+                remainingSeconds = minutes * SECONDS_PER_MINUTE,
                 progress = 1f
             )
         }
     }
 
     fun setBreakMinutes(minutes: Int) {
-        if (_state.value.timerState == TimerState.IDLE) {
-            _state.value = _state.value.copy(breakMinutes = minutes)
-        }
+        if (_state.value.timerState != TimerState.IDLE) return
+        _state.update { it.copy(breakMinutes = minutes) }
     }
 
     fun setActiveSubject(subjectId: Long?) {
-        if (_state.value.timerState == TimerState.IDLE) {
-            _state.value = _state.value.copy(activeSubjectId = subjectId)
-        }
+        if (_state.value.timerState != TimerState.IDLE) return
+        _state.update { it.copy(activeSubjectId = subjectId) }
     }
 
     fun applyPreset(focus: Int, breakDuration: Int) {
-        if (_state.value.timerState == TimerState.IDLE) {
-            _state.value = _state.value.copy(
+        if (_state.value.timerState != TimerState.IDLE) return
+        _state.update {
+            it.copy(
                 focusMinutes = focus,
                 breakMinutes = breakDuration,
-                remainingSeconds = focus * 60,
+                remainingSeconds = focus * SECONDS_PER_MINUTE,
                 progress = 1f
             )
         }
@@ -157,5 +162,10 @@ class TimerViewModel(application: Application) : AndroidViewModel(application) {
     override fun onCleared() {
         super.onCleared()
         timerJob?.cancel()
+    }
+
+    private companion object {
+        const val TICK_INTERVAL_MS = 1_000L
+        const val SECONDS_PER_MINUTE = 60
     }
 }

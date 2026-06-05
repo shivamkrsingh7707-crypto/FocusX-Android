@@ -35,11 +35,11 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,7 +63,7 @@ fun SettingsScreen(
     settingsViewModel: SettingsViewModel,
     onThemeToggle: (Offset) -> Unit = {}
 ) {
-    val state by settingsViewModel.state.collectAsState()
+    val state by settingsViewModel.state.collectAsStateWithLifecycle()
     val theme = StudyFlowTheme.colors
 
     Column(

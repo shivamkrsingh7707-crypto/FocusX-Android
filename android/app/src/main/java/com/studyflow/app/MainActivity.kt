@@ -6,16 +6,17 @@ import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.Build
 import android.os.Bundle
-import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.view.Display
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.studyflow.app.ui.navigation.StudyFlowNavigation
 import com.studyflow.app.ui.theme.StudyFlowTheme
@@ -42,8 +44,7 @@ class MainActivity : ComponentActivity() {
 
         toneGenerator = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 60)
         vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val manager = getSystemService(VibratorManager::class.java)
-            manager.defaultVibrator
+            getSystemService(VibratorManager::class.java)?.defaultVibrator
         } else {
             @Suppress("DEPRECATION")
             getSystemService(Vibrator::class.java)
@@ -51,9 +52,7 @@ class MainActivity : ComponentActivity() {
 
         requestNotificationPermission()
 
-        setContent {
-            StudyFlowApp()
-        }
+        setContent { StudyFlowApp() }
     }
 
     /**
@@ -62,71 +61,54 @@ class MainActivity : ComponentActivity() {
      * closest supported mode.
      */
     private fun applyHighRefreshRate() {
-        try {
-            val display = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                display
-            } else {
-                @Suppress("DEPRECATION")
-                window.windowManager.defaultDisplay
-            }
-            val bestMode = display?.supportedModes?.maxByOrNull { it.refreshRate }
-            if (bestMode != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                val params = window.attributes
-                params.preferredDisplayModeId = bestMode.modeId
-                window.attributes = params
-            } else {
-                @Suppress("DEPRECATION")
-                val params = window.attributes
-                params.preferredRefreshRate = 90f
-                window.attributes = params
-            }
-        } catch (_: Throwable) {
-            // best-effort; if the device won't honor it, the default rate is used
+        val display: Display? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            display
+        } else {
             @Suppress("DEPRECATION")
-            window.attributes = window.attributes.apply {
-                preferredRefreshRate = 90f
-            }
+            window.windowManager.defaultDisplay
         }
-        // Hint the framework for a high refresh rate even when a specific mode
-        // can't be picked (older devices).
-        runCatching {
-            window.addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
-        }
+
+        val params = window.attributes
+        display?.supportedModes
+            ?.maxByOrNull { it.refreshRate }
+            ?.takeIf { Build.VERSION.SDK_INT >= Build.VERSION_CODES.M }
+            ?.let { params.preferredDisplayModeId = it.modeId }
+            ?: run { @Suppress("DEPRECATION") params.preferredRefreshRate = TARGET_REFRESH_HZ }
+        window.attributes = params
+
+        runCatching { window.addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED) }
     }
 
     private fun requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(
-                    this, Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                requestPermissions(
-                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                    1001
-                )
-            }
-        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            == PackageManager.PERMISSION_GRANTED
+        ) return
+        requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), NOTIF_PERMISSION_REQUEST)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         toneGenerator?.release()
     }
+
+    private companion object {
+        const val TARGET_REFRESH_HZ = 90f
+        const val NOTIF_PERMISSION_REQUEST = 1001
+    }
 }
 
-@androidx.compose.runtime.Composable
+@Composable
 private fun StudyFlowApp() {
     val settingsViewModel: SettingsViewModel = viewModel()
-    val state by settingsViewModel.state.collectAsState()
+    val state by settingsViewModel.state.collectAsStateWithLifecycle()
 
     val isDark = when (state.themeMode) {
-        ThemeMode.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true
     }
 
-    // Track the tap origin so the reveal animation can grow from where the
-    // user actually pressed.
     var revealActive by remember { mutableStateOf(false) }
     var revealOrigin by remember { mutableStateOf(Offset.Zero) }
 
