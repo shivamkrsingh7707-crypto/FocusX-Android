@@ -69,6 +69,7 @@ fun StudyFlowNavigation() {
                     settingsViewModel = settingsViewModel
                 )
             }
+            }
         }
     }
 }
