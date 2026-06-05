@@ -52,7 +52,7 @@ fun TimerRing(
             drawCircle(
                 color = Color.White.copy(alpha = 0.08f),
                 radius = radius,
-                center = Offset(size.width.toPx() / 2, size.height.toPx() / 2),
+                center = Offset(this.size.width / 2f, this.size.height / 2f),
                 style = Stroke(width = stroke)
             )
 
@@ -65,7 +65,7 @@ fun TimerRing(
                     )
                 ),
                 radius = radius,
-                center = Offset(size.width.toPx() / 2, size.height.toPx() / 2),
+                center = Offset(this.size.width / 2f, this.size.height / 2f),
                 style = Stroke(width = stroke, cap = StrokeCap.Round),
                 startAngle = -90f,
                 sweepAngle = 360f * animatedProgress

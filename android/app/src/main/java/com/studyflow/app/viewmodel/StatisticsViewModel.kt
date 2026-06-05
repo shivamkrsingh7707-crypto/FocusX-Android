@@ -60,7 +60,7 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
                 var weekTotal = 0
 
                 val weeklyData = (0..6).map { offset ->
-                    val date = monday.plusDays(offset)
+                    val date = monday.plusDays(offset.toLong())
                     val dateStr = date.format(formatter)
                     val minutes = dayMinutesMap[dateStr] ?: 0
                     weekTotal += minutes
