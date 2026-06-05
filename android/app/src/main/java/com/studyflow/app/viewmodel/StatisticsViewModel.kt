@@ -60,7 +60,7 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
     private suspend fun computeStatistics(): StatisticsState {
         val today = LocalDate.now()
         val monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-        val sunday = monday.plusDays(WEEK_LENGTH - 1)
+        val sunday = monday.plusDays(WEEK_LENGTH_MINUS_ONE)
         val formatter = DateTimeFormatter.ISO_LOCAL_DATE
         val locale = Locale.getDefault()
 
@@ -98,6 +98,7 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
     private companion object {
         const val WEEK_LENGTH = 7
         const val WEEK_LENGTH_DOUBLE = 7.0
+        const val WEEK_LENGTH_MINUS_ONE: Long = (WEEK_LENGTH - 1).toLong()
         const val DAY_LABEL_LEN = 3
     }
 }
