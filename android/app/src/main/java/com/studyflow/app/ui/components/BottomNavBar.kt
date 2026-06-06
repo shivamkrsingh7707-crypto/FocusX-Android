@@ -1,13 +1,15 @@
 package com.studyflow.app.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,12 +35,14 @@ import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -74,22 +78,29 @@ fun BottomNavBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(horizontal = 14.dp, vertical = 10.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(64.dp)
+                .height(68.dp)
                 .shadow(
-                    elevation = 14.dp,
-                    shape = RoundedCornerShape(28.dp),
+                    elevation = 18.dp,
+                    shape = RoundedCornerShape(32.dp),
                     ambientColor = theme.border,
                     spotColor = theme.border,
                     clip = false
                 )
-                .clip(RoundedCornerShape(28.dp))
-                .background(theme.surfaceElevated)
-                .border(1.dp, theme.border, RoundedCornerShape(28.dp))
+                .clip(RoundedCornerShape(32.dp))
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            theme.surfaceElevated,
+                            theme.surface
+                        )
+                    )
+                )
+                .border(1.dp, theme.border, RoundedCornerShape(32.dp))
                 .padding(6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(2.dp)
@@ -117,39 +128,44 @@ private fun FloatingNavItem(
 ) {
     val theme = StudyFlowTheme.colors
     val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
 
-    val pillAlpha by animateFloatAsState(
-        targetValue = if (selected) 1f else 0f,
-        animationSpec = tween(260),
-        label = "pillAlpha"
-    )
+    // Spring-driven press scale so taps feel "alive" at 120Hz.
+    val pressAnim = remember { Animatable(1f) }
+    LaunchedEffect(pressed) {
+        pressAnim.animateTo(
+            targetValue = if (pressed) 0.92f else 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessHigh
+            )
+        )
+    }
+
     val iconColor by animateColorAsState(
         targetValue = if (selected) PrimaryBlue else theme.textMuted,
-        animationSpec = tween(220),
+        animationSpec = tween(220, easing = FastOutSlowInEasing),
         label = "icon"
     )
     val labelColor by animateColorAsState(
         targetValue = if (selected) PrimaryBlue else theme.textMuted,
-        animationSpec = tween(220),
+        animationSpec = tween(220, easing = FastOutSlowInEasing),
         label = "label"
     )
-    val pressScale by animateFloatAsState(
-        targetValue = 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessHigh
-        ),
-        label = "press"
+    val pillBg by animateColorAsState(
+        targetValue = if (selected) PrimaryBlue.copy(alpha = 0.18f) else Color.Transparent,
+        animationSpec = tween(280, easing = FastOutSlowInEasing),
+        label = "pillBg"
     )
 
     Box(
         modifier = modifier
             .graphicsLayer {
-                scaleX = pressScale
-                scaleY = pressScale
+                scaleX = pressAnim.value
+                scaleY = pressAnim.value
             }
-            .clip(RoundedCornerShape(22.dp))
-            .background(PrimaryBlue.copy(alpha = 0.18f * pillAlpha))
+            .clip(RoundedCornerShape(24.dp))
+            .background(pillBg)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,

@@ -1,5 +1,9 @@
 package com.studyflow.app.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,9 +27,11 @@ import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -53,11 +59,30 @@ fun SubjectCard(
     val subjectColor = SubjectColors.getOrElse(subject.colorIndex) { SubjectColors[0] }
     val theme = StudyFlowTheme.colors
 
+    val surfaceTop by animateColorAsState(
+        targetValue = if (isSelected) subjectColor.copy(alpha = 0.20f) else theme.surfaceElevated,
+        animationSpec = tween(360, easing = FastOutSlowInEasing),
+        label = "subTop"
+    )
+    val surfaceBottom by animateColorAsState(
+        targetValue = if (isSelected) subjectColor.copy(alpha = 0.06f) else theme.surface,
+        animationSpec = tween(360, easing = FastOutSlowInEasing),
+        label = "subBottom"
+    )
+
+    val progress = if (subject.targetHoursPerWeek > 0)
+        ((subject.totalMinutes / 60f) / subject.targetHoursPerWeek).coerceIn(0f, 1f) else 0f
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(420, easing = FastOutSlowInEasing),
+        label = "subProgress"
+    )
+
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(if (isSelected) subjectColor.copy(alpha = 0.15f) else theme.surface)
+            .clip(RoundedCornerShape(20.dp))
+            .background(Brush.verticalGradient(listOf(surfaceTop, surfaceBottom)))
             .clickable(onClick = onClick)
             .padding(16.dp)
     ) {
@@ -68,7 +93,7 @@ fun SubjectCard(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(subjectColor.copy(alpha = 0.2f)),
+                    .background(subjectColor.copy(alpha = 0.22f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -101,9 +126,10 @@ fun SubjectCard(
                     Text(
                         text = "${subject.totalMinutes / 60}h / ${subject.targetHoursPerWeek}h",
                         color = theme.textMuted,
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(0.4f)
@@ -111,11 +137,9 @@ fun SubjectCard(
                             .clip(RoundedCornerShape(2.dp))
                             .background(subjectColor.copy(alpha = 0.2f))
                     ) {
-                        val progress = if (subject.targetHoursPerWeek > 0)
-                            (subject.totalMinutes / 60f) / subject.targetHoursPerWeek else 0f
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth(progress.coerceIn(0f, 1f))
+                                .fillMaxWidth(animatedProgress)
                                 .height(4.dp)
                                 .clip(RoundedCornerShape(2.dp))
                                 .background(subjectColor)
@@ -136,7 +160,7 @@ fun AddSubjectCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(20.dp))
             .background(theme.surfaceElevated)
             .clickable(onClick = onClick)
             .padding(20.dp),
