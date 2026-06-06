@@ -6,7 +6,6 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -63,16 +62,21 @@ fun TimerRing(
     // Subtle rotating shimmer for the gradient stops while the timer runs.
     // Pure visual candy — it sits inside a sweepGradient so it scales with
     // the ring's colour rather than introducing an extra draw.
-    val infinite = rememberInfiniteTransition(label = "shimmer")
-    val shimmer by infinite.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2400, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "shimmerValue"
-    )
+    val shimmerAnim = remember { Animatable(0f) }
+    LaunchedEffect(isActive) {
+        if (isActive) {
+            shimmerAnim.animateTo(
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable<Float>(
+                    animation = tween(2400, easing = LinearEasing),
+                    repeatMode = RepeatMode.Restart
+                )
+            )
+        } else {
+            shimmerAnim.snapTo(0f)
+        }
+    }
+    val shimmer = shimmerAnim.value
 
     Box(
         modifier = modifier.size(size),
