@@ -1,10 +1,8 @@
 package com.studyflow.app.ui.components
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,16 +33,15 @@ import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -130,18 +127,6 @@ private fun FloatingNavItem(
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
 
-    // Spring-driven press scale so taps feel "alive" at 120Hz.
-    val pressAnim = remember { Animatable(1f) }
-    LaunchedEffect(pressed) {
-        pressAnim.animateTo(
-            targetValue = if (pressed) 0.92f else 1f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessHigh
-            )
-        )
-    }
-
     val iconColor by animateColorAsState(
         targetValue = if (selected) PrimaryBlue else theme.textMuted,
         animationSpec = tween(220, easing = FastOutSlowInEasing),
@@ -158,12 +143,21 @@ private fun FloatingNavItem(
         label = "pillBg"
     )
 
+    // Quick press-scale: derived directly from `pressed` via `animateFloatAsState`,
+    // no separate coroutine. 110ms in / 180ms out, so it feels snappy without
+    // a spring's overshoot at 120Hz.
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) 0.94f else 1f,
+        animationSpec = tween(
+            durationMillis = if (pressed) 110 else 180,
+            easing = FastOutSlowInEasing
+        ),
+        label = "press"
+    )
+
     Box(
         modifier = modifier
-            .graphicsLayer {
-                scaleX = pressAnim.value
-                scaleY = pressAnim.value
-            }
+            .scale(scale)
             .clip(RoundedCornerShape(24.dp))
             .background(pillBg)
             .clickable(

@@ -1,9 +1,5 @@
 package com.studyflow.app.ui.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,7 +23,6 @@ import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,24 +54,11 @@ fun SubjectCard(
     val subjectColor = SubjectColors.getOrElse(subject.colorIndex) { SubjectColors[0] }
     val theme = StudyFlowTheme.colors
 
-    val surfaceTop by animateColorAsState(
-        targetValue = if (isSelected) subjectColor.copy(alpha = 0.20f) else theme.surfaceElevated,
-        animationSpec = tween(360, easing = FastOutSlowInEasing),
-        label = "subTop"
-    )
-    val surfaceBottom by animateColorAsState(
-        targetValue = if (isSelected) subjectColor.copy(alpha = 0.06f) else theme.surface,
-        animationSpec = tween(360, easing = FastOutSlowInEasing),
-        label = "subBottom"
-    )
+    val surfaceTop = if (isSelected) subjectColor.copy(alpha = 0.20f) else theme.surfaceElevated
+    val surfaceBottom = if (isSelected) subjectColor.copy(alpha = 0.06f) else theme.surface
 
     val progress = if (subject.targetHoursPerWeek > 0)
         ((subject.totalMinutes / 60f) / subject.targetHoursPerWeek).coerceIn(0f, 1f) else 0f
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress,
-        animationSpec = tween(420, easing = FastOutSlowInEasing),
-        label = "subProgress"
-    )
 
     Box(
         modifier = modifier
@@ -139,7 +121,7 @@ fun SubjectCard(
                     ) {
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth(animatedProgress)
+                                .fillMaxWidth(progress)
                                 .height(4.dp)
                                 .clip(RoundedCornerShape(2.dp))
                                 .background(subjectColor)

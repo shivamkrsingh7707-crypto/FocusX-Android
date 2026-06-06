@@ -1,8 +1,5 @@
 package com.studyflow.app.ui.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,12 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,22 +34,13 @@ fun StatCard(
     modifier: Modifier = Modifier
 ) {
     val theme = StudyFlowTheme.colors
-    // A subtle gradient gives the card a "lit" feel without changing the
-    // design language. Both colors track the theme so it crossfades cleanly.
-    val topColor by animateColorAsState(
-        targetValue = theme.surfaceElevated,
-        animationSpec = tween(360, easing = FastOutSlowInEasing),
-        label = "statTop"
-    )
-    val bottomColor by animateColorAsState(
-        targetValue = theme.surface,
-        animationSpec = tween(360, easing = FastOutSlowInEasing),
-        label = "statBottom"
-    )
+    // Static gradient. The card reads the theme tokens directly, and the
+    // [ThemeRevealOverlay] handles the visual theme transition — no
+    // per-frame animation is needed (or wanted) on individual cards.
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(Brush.verticalGradient(listOf(topColor, bottomColor)))
+            .background(Brush.verticalGradient(listOf(theme.surfaceElevated, theme.surface)))
             .padding(horizontal = 14.dp, vertical = 14.dp)
     ) {
         Box(

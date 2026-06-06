@@ -1,11 +1,7 @@
 package com.studyflow.app.ui.components
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -49,34 +45,9 @@ fun TimerRing(
         )
     }
 
-    val trackColor by animateColorAsState(
-        targetValue = Color.White.copy(alpha = 0.08f),
-        animationSpec = tween(300, easing = FastOutSlowInEasing),
-        label = "track"
-    )
-
     val minutes = remainingSeconds / 60
     val seconds = remainingSeconds % 60
     val timeText = String.format("%02d:%02d", minutes, seconds)
-
-    // Subtle rotating shimmer for the gradient stops while the timer runs.
-    // Pure visual candy — it sits inside a sweepGradient so it scales with
-    // the ring's colour rather than introducing an extra draw.
-    val shimmerAnim = remember { Animatable(0f) }
-    LaunchedEffect(isActive) {
-        if (isActive) {
-            shimmerAnim.animateTo(
-                targetValue = 1f,
-                animationSpec = infiniteRepeatable<Float>(
-                    animation = tween(2400, easing = LinearEasing),
-                    repeatMode = RepeatMode.Restart
-                )
-            )
-        } else {
-            shimmerAnim.snapTo(0f)
-        }
-    }
-    val shimmer = shimmerAnim.value
 
     Box(
         modifier = modifier.size(size),
@@ -91,6 +62,7 @@ fun TimerRing(
                 (this.size.width - arcSize.width) / 2f,
                 (this.size.height - arcSize.height) / 2f
             )
+            val trackColor = Color.White.copy(alpha = 0.08f)
 
             // Track
             drawCircle(
@@ -100,46 +72,16 @@ fun TimerRing(
                 style = Stroke(width = stroke)
             )
 
-            // Soft glow halo behind the active arc, just on the leading edge.
-            // It's a slightly thicker, very low-alpha stroke that gives the
-            // ring a "lit" feel without burning extra draws.
-            if (isActive) {
-                val glowStroke = stroke * 1.8f
-                drawArc(
-                    color = PrimaryBlue.copy(alpha = 0.18f),
-                    startAngle = -90f,
-                    sweepAngle = 360f * progressAnim.value,
-                    useCenter = false,
-                    topLeft = Offset(
-                        arcOffset.x - (glowStroke - stroke) / 2f,
-                        arcOffset.y - (glowStroke - stroke) / 2f
-                    ),
-                    size = Size(arcSize.width + (glowStroke - stroke), arcSize.height + (glowStroke - stroke)),
-                    style = Stroke(width = glowStroke, cap = StrokeCap.Round)
-                )
-            }
-
-            // Main progress arc with rotating gradient stops. The third stop
-            // sweeps around the ring while the timer is active so the colour
-            // doesn't feel static.
+            // Main progress arc with a static 3-stop sweep gradient.
             val sweep = 360f * progressAnim.value
-            val activeColors = if (isActive) {
-                val stop = shimmer
-                listOf(
-                    PrimaryBlue,
-                    PrimaryBlue.copy(alpha = 0.85f),
-                    PrimaryBlue.copy(alpha = 0.55f + 0.45f * (1f - stop)),
-                    PrimaryBlue
-                )
-            } else {
-                listOf(
-                    PrimaryBlue,
-                    PrimaryBlue.copy(alpha = 0.7f),
-                    PrimaryBlue
-                )
-            }
             drawArc(
-                brush = Brush.sweepGradient(activeColors),
+                brush = Brush.sweepGradient(
+                    listOf(
+                        PrimaryBlue,
+                        PrimaryBlue.copy(alpha = 0.7f),
+                        PrimaryBlue
+                    )
+                ),
                 startAngle = -90f,
                 sweepAngle = sweep,
                 useCenter = false,
@@ -148,7 +90,7 @@ fun TimerRing(
                 style = Stroke(width = stroke, cap = StrokeCap.Round)
             )
 
-            // Tiny leading-edge "head" dot. Pure decoration but very iOS-like.
+            // Leading-edge "head" dot while running.
             if (isActive && progressAnim.value > 0f) {
                 val angleRad = Math.toRadians((-90f + sweep).toDouble())
                 val cx = (this.size.width / 2f) + radius * kotlin.math.cos(angleRad).toFloat()
