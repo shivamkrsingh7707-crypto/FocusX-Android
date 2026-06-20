@@ -7,18 +7,21 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import dev.focusx.app.data.local.dao.GradeDao
 import dev.focusx.app.data.local.dao.SessionDao
+import dev.focusx.app.data.local.dao.StudySessionDao
 import dev.focusx.app.data.local.dao.SubjectDao
 import dev.focusx.app.data.local.entity.GradeEntity
 import dev.focusx.app.data.local.entity.SessionEntity
+import dev.focusx.app.data.local.entity.StudySessionEntity
 import dev.focusx.app.data.local.entity.SubjectEntity
 
 @Database(
     entities = [
         SubjectEntity::class,
         SessionEntity::class,
-        GradeEntity::class
+        GradeEntity::class,
+        StudySessionEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -27,6 +30,7 @@ abstract class FocusXDatabase : RoomDatabase() {
     abstract fun subjectDao(): SubjectDao
     abstract fun sessionDao(): SessionDao
     abstract fun gradeDao(): GradeDao
+    abstract fun studySessionDao(): StudySessionDao
 
     companion object {
         @Volatile

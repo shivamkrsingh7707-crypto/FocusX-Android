@@ -2,7 +2,9 @@ package dev.focusx.app.data.repository
 
 import dev.focusx.app.data.local.dao.GradeDao
 import dev.focusx.app.data.local.dao.SessionDao
+import dev.focusx.app.data.local.dao.StudySessionDao
 import dev.focusx.app.data.local.dao.SubjectDao
+import dev.focusx.app.data.local.entity.StudySessionEntity
 import dev.focusx.app.data.local.entity.toDomain
 import dev.focusx.app.data.local.entity.toEntity
 import dev.focusx.app.domain.Grade
@@ -17,7 +19,8 @@ import java.time.LocalDate
 class StudyRepository(
     private val subjectDao: SubjectDao,
     private val sessionDao: SessionDao,
-    private val gradeDao: GradeDao
+    private val gradeDao: GradeDao,
+    private val studySessionDao: StudySessionDao
 ) {
 
     // ── Subjects ──────────────────────────────────────────────────────────
@@ -113,6 +116,15 @@ class StudyRepository(
     suspend fun getOverallWeightedAverage(): Double = withContext(Dispatchers.IO) {
         val grades = gradeDao.getAll()
         computeWeightedAverage(grades.map { it.toDomain() })
+    }
+
+    // ── Study Sessions ────────────────────────────────────────────────────
+
+    fun observeStudySessions(): Flow<List<StudySessionEntity>> =
+        studySessionDao.observeAll()
+
+    suspend fun insertStudySession(session: StudySessionEntity) = withContext(Dispatchers.IO) {
+        studySessionDao.insert(session)
     }
 
     private fun computeWeightedAverage(grades: List<Grade>): Double {

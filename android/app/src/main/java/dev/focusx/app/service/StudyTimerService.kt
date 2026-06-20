@@ -1,10 +1,16 @@
 package dev.focusx.app.service
 
+import android.app.AlarmManager
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import dev.focusx.app.FocusXApplication
+import dev.focusx.app.data.local.entity.StudySessionEntity
+import dev.focusx.app.data.repository.StudyRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,23 +22,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-/**
- * Foreground Service that tracks study session duration using absolute
- * wall-clock timestamps ([System.currentTimeMillis]).  Because the
- * elapsed time is derived from real-time epoch timestamps rather than
- * counting delay-loop iterations, Android's Doze mode cannot cause
- * drift: even if the tick coroutine is deferred by the system, the
- * computed elapsed time remains exactly correct.
- *
- * Commands are accepted via [Intent] actions:
- *   [ACTION_START]   – begin or resume a session
- *   [ACTION_PAUSE]   – pause an active session
- *   [ACTION_RESET]   – cancel the current session
- *
- * The UI observes [elapsedMs] and [serviceState] via the returned
- * [TimerBinder] after binding with [bindService].
- */
 class StudyTimerService : Service() {
 
     // ── Intent actions ────────────────────────────────────────────────────
@@ -45,19 +36,20 @@ class StudyTimerService : Service() {
 
         const val EXTRA_DURATION_MS = "extra_duration_ms"
         const val EXTRA_SUBJECT_ID = "extra_subject_id"
+        const val EXTRA_SUBJECT_NAME = "extra_subject_name"
 
         fun startIntent(
             durationMs: Long,
-            subjectId: String? = null
+            subjectId: String? = null,
+            subjectName: String? = null
         ): Intent = Intent(ACTION_START).apply {
             putExtra(EXTRA_DURATION_MS, durationMs)
             subjectId?.let { putExtra(EXTRA_SUBJECT_ID, it) }
+            subjectName?.let { putExtra(EXTRA_SUBJECT_NAME, it) }
         }
 
         fun pauseIntent() = Intent(ACTION_PAUSE)
-
         fun resumeIntent() = Intent(ACTION_RESUME)
-
         fun resetIntent() = Intent(ACTION_RESET)
     }
 
@@ -71,6 +63,7 @@ class StudyTimerService : Service() {
 
     private val binder = TimerBinder()
     private lateinit var notificationHelper: TimerNotificationHelper
+    private lateinit var roomRepo: StudyRepository
 
     // ── Observable state ──────────────────────────────────────────────────
 
@@ -88,6 +81,7 @@ class StudyTimerService : Service() {
     private var startWallClockMs: Long = 0L
     private var accumulatedMs: Long = 0L
     private var focusDurationMs: Long = 0L
+    private var subjectName: String? = null
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var tickJob: Job? = null
@@ -97,6 +91,10 @@ class StudyTimerService : Service() {
     override fun onCreate() {
         super.onCreate()
         notificationHelper = TimerNotificationHelper(this)
+        val db = (applicationContext as FocusXApplication).database
+        roomRepo = StudyRepository(
+            db.subjectDao(), db.sessionDao(), db.gradeDao(), db.studySessionDao()
+        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -121,6 +119,7 @@ class StudyTimerService : Service() {
     private fun handleStart(intent: Intent) {
         focusDurationMs = intent.getLongExtra(EXTRA_DURATION_MS, 25 * 60 * 1000L)
         _activeSubjectId.value = intent.getStringExtra(EXTRA_SUBJECT_ID)
+        subjectName = intent.getStringExtra(EXTRA_SUBJECT_NAME)
         startWallClockMs = System.currentTimeMillis()
         accumulatedMs = 0L
         _elapsedMs.value = 0L
@@ -159,21 +158,13 @@ class StudyTimerService : Service() {
         _elapsedMs.value = 0L
         _serviceState.value = ServiceState.IDLE
         _activeSubjectId.value = null
+        subjectName = null
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
 
     // ── Tick loop ─────────────────────────────────────────────────────────
 
-    /**
-     * Launches a coroutine that reads the wall clock every ~250 ms,
-     * computes the true elapsed time, and pushes updates to the
-     * [elapsedMs] StateFlow and the foreground notification.
-     *
-     * Because elapsed = [accumulatedMs] + (now – [startWallClockMs]),
-     * the value is always anchored to absolute time irrespective of how
-     * often the coroutine actually runs.
-     */
     private fun startTicking() {
         tickJob?.cancel()
         tickJob = scope.launch {
@@ -197,8 +188,49 @@ class StudyTimerService : Service() {
     private fun onTimerCompleted() {
         _elapsedMs.value = focusDurationMs
         _serviceState.value = ServiceState.COMPLETED
-        stopForeground(STOP_FOREGROUND_REMOVE)
-        stopSelf()
+
+        scope.launch {
+            try {
+                val name = subjectName ?: "General"
+                withContext(Dispatchers.IO) {
+                    roomRepo.insertStudySession(
+                        StudySessionEntity(
+                            subjectName = name,
+                            durationMinutes = focusDurationMs / 60_000L,
+                            timestamp = startWallClockMs
+                        )
+                    )
+                }
+                scheduleAlarm()
+            } finally {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+                stopSelf()
+            }
+        }
+    }
+
+    private fun scheduleAlarm() {
+        val alarmMgr = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, AlarmReceiver::class.java).apply {
+            action = AlarmReceiver.ACTION_ALARM
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            this, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val showIntent = Intent(this, dev.focusx.app.MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        alarmMgr.setAlarmClock(
+            AlarmManager.AlarmClockInfo(
+                System.currentTimeMillis(),
+                PendingIntent.getActivity(
+                    this, 0, showIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            ),
+            pendingIntent
+        )
     }
 
     // ── Notification ──────────────────────────────────────────────────────

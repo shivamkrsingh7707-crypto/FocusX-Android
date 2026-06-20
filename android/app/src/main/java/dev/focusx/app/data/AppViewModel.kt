@@ -1,17 +1,26 @@
 package dev.focusx.app.data
 
+import android.app.AlarmManager
 import android.app.Application
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dev.focusx.app.FocusXApplication
+import dev.focusx.app.data.local.entity.StudySessionEntity
+import dev.focusx.app.data.repository.StudyRepository
 import dev.focusx.app.domain.AppState
 import dev.focusx.app.domain.Settings
 import dev.focusx.app.domain.Subject
 import dev.focusx.app.domain.TimerPhase
 import dev.focusx.app.domain.TimerState
 import dev.focusx.app.domain.TimerStatus
+import dev.focusx.app.service.AlarmReceiver
 import dev.focusx.app.sys.Haptics
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,8 +28,10 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * One [ViewModel] to rule them all. The state graph is small enough that
@@ -31,6 +42,14 @@ import kotlinx.coroutines.launch
 class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repo = StateRepository(application)
+
+    private val roomRepo = StudyRepository(
+        (application as FocusXApplication).database.subjectDao(),
+        (application as FocusXApplication).database.sessionDao(),
+        (application as FocusXApplication).database.gradeDao(),
+        (application as FocusXApplication).database.studySessionDao()
+    )
+
     private val haptics = Haptics(application)
 
     private val _timer = MutableStateFlow(TimerState())
@@ -40,11 +59,19 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     /** Wall-clock instant (ms) when the running timer should hit zero. */
     private var endsAt: Long = 0L
 
+    val studySessions: StateFlow<List<StudySessionEntity>> =
+        roomRepo.observeStudySessions().stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
+
     val state: StateFlow<UiState> = combine(
         repo.state,
-        _timer
-    ) { snapshot, timer ->
-        UiState(snapshot, timer)
+        _timer,
+        studySessions
+    ) { snapshot, timer, sessions ->
+        UiState(snapshot, timer, sessions)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -196,13 +223,34 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
         haptics.complete()
 
+        val now = System.currentTimeMillis()
+        val startedAt = now - minutes * 60_000L
+
         viewModelScope.launch {
             repo.appendSession(
                 subjectId = snapshot.activeSubjectId,
                 minutes = minutes,
                 phase = phase,
-                startedAt = System.currentTimeMillis() - minutes * 60_000L
+                startedAt = startedAt
             )
+        }
+
+        viewModelScope.launch {
+            val appState = withContext(Dispatchers.IO) { repo.state.first() }
+            val subjectName = snapshot.activeSubjectId?.let { id ->
+                appState.subjects.firstOrNull { it.id == id }?.name
+            } ?: "General"
+
+            withContext(Dispatchers.IO) {
+                roomRepo.insertStudySession(
+                    StudySessionEntity(
+                        subjectName = subjectName,
+                        durationMinutes = minutes.toLong(),
+                        timestamp = startedAt
+                    )
+                )
+            }
+            scheduleAlarm()
         }
 
         val newTodayMin = if (phase == TimerPhase.FOCUS)
@@ -220,6 +268,31 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
+    private fun scheduleAlarm() {
+        val ctx = getApplication<Application>()
+        val alarmMgr = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(ctx, AlarmReceiver::class.java).apply {
+            action = AlarmReceiver.ACTION_ALARM
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            ctx, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val showIntent = Intent(ctx, dev.focusx.app.MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        alarmMgr.setAlarmClock(
+            AlarmManager.AlarmClockInfo(
+                System.currentTimeMillis(),
+                PendingIntent.getActivity(
+                    ctx, 0, showIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            ),
+            pendingIntent
+        )
+    }
+
     override fun onCleared() {
         super.onCleared()
         tickJob?.cancel()
@@ -228,7 +301,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     /** Pair of (persisted snapshot, live timer) — what every screen reads. */
     data class UiState(
         val snapshot: AppState = AppState(),
-        val timer: TimerState = TimerState()
+        val timer: TimerState = TimerState(),
+        val studySessions: List<StudySessionEntity> = emptyList()
     )
 
     companion object {

@@ -36,7 +36,6 @@ import dev.focusx.app.ui.components.Pill
 import dev.focusx.app.ui.components.ScreenHeader
 import dev.focusx.app.ui.components.SectionLabel
 import dev.focusx.app.ui.components.SurfaceCard
-import dev.focusx.app.ui.components.WeeklyBarChart
 import dev.focusx.app.ui.theme.FocusXTheme
 import dev.focusx.app.ui.theme.SubjectPalette
 import java.time.LocalDate
@@ -51,6 +50,9 @@ fun StatsScreen(
     val snap = ui.snapshot
     val totalMin = snap.totalMinutes
     val totalSess = snap.totalSessions
+    val studySessions = ui.studySessions
+    val roomTotalMinutes = studySessions.sumOf { it.durationMinutes }
+    val roomSessionCount = studySessions.size
     val avg = if (snap.sessions.isNotEmpty()) totalMin / snap.sessions.size else 0
     val best = snap.sessions.maxOfOrNull { it.minutes } ?: 0
 
@@ -119,6 +121,28 @@ fun StatsScreen(
                         goal = snap.settings.dailyGoalMinutes,
                         modifier = Modifier.fillMaxWidth()
                     )
+                }
+            }
+            item {
+                SectionLabel(text = "Persisted sessions (Room)")
+            }
+            item {
+                SurfaceCard(modifier = Modifier.fillMaxWidth()) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "$roomSessionCount sessions",
+                                color = theme.onSurface,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = "${formatMinutes(roomTotalMinutes.toInt())} total",
+                                color = theme.textSecondary,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
                 }
             }
             item {
