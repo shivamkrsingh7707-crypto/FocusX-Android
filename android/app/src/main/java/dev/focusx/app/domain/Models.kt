@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter
  */
 @Immutable
 data class AppState(
-    val timer: TimerState = TimerState.Idle,
+    val timer: TimerState = TimerState(),
     val subjects: List<Subject> = defaultSubjects,
     val sessions: List<Session> = emptyList(),
     val streak: Int = 0,
