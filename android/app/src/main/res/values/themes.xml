@@ -1,19 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--
-        Splash theme parented to androidx.core.splashscreen. Using a real
-        SplashScreen theme means the cold-start background colour matches
-        the app surface exactly, so the first frame after setContent is
-        a seamless continuation rather than a hard colour swap.
-    -->
-    <style name="Theme.StudyFlow.Splash" parent="Theme.SplashScreen">
+    <style name="Theme.FocusX.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/splash_background</item>
-        <item name="postSplashScreenTheme">@style/Theme.StudyFlow</item>
+        <item name="postSplashScreenTheme">@style/Theme.FocusX</item>
         <item name="android:windowSplashScreenBehavior">icon_preferred</item>
     </style>
 
-    <!-- Post-splash app theme. Keep this minimal: real theming happens in Compose. -->
-    <style name="Theme.StudyFlow" parent="android:Theme.Material.NoActionBar">
+    <style name="Theme.FocusX" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/splash_background</item>
         <item name="android:statusBarColor">@color/splash_background</item>
         <item name="android:navigationBarColor">@color/splash_background</item>
