@@ -36,6 +36,7 @@ import dev.focusx.app.ui.components.Pill
 import dev.focusx.app.ui.components.ScreenHeader
 import dev.focusx.app.ui.components.SectionLabel
 import dev.focusx.app.ui.components.SurfaceCard
+import dev.focusx.app.ui.components.WeeklyBarChart
 import dev.focusx.app.ui.theme.FocusXTheme
 import dev.focusx.app.ui.theme.SubjectPalette
 import java.time.LocalDate
