@@ -5,10 +5,12 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -19,9 +21,11 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlin.math.hypot
+import kotlin.math.max
 
 private const val RevealDurationMs = 620
 private const val HoldDurationMs = 90L
@@ -79,7 +83,13 @@ fun ThemeRevealOverlay(
         }
     }
 
-    if (!active) return
+    val overlayAlpha by animateFloatAsState(
+        targetValue = if (active) 1f else 0f,
+        animationSpec = tween(durationMillis = 300),
+        label = "overlayAlpha"
+    )
+
+    if (overlayAlpha <= 0f && !active) return
 
     val overlayColor = if (isTargetDark) LightBackground else AmoledBlack
     val glowColor = if (isTargetDark) Color.Black else Color.White
@@ -87,22 +97,42 @@ fun ThemeRevealOverlay(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .graphicsLayer {
+                alpha = overlayAlpha
+            }
             .drawWithCache {
                 val w = size.width
                 val h = size.height
-                val maxRadius = hypot(w, h) * 0.62f
+                val ox = origin.x
+                val oy = origin.y
+                val maxRadius = hypot(max(ox, w - ox), max(oy, h - oy))
                 val strokePx = GlowStrokeDp.dp.toPx()
+                val path = Path()
                 onDrawWithContent {
                     val progress = radiusAnim.value
                     val glow = glowAnim.value
-                    if (progress <= 0f) {
-                        drawRect(color = overlayColor)
-                        return@onDrawWithContent
-                    }
-                    val radius = maxRadius * progress
 
-                    if (glow > 0f && progress < 1f) {
+                    path.rewind()
+                    path.fillType = PathFillType.EvenOdd
+                    path.addRect(Rect(0f, 0f, w, h))
+
+                    if (progress > 0f) {
+                        val radius = maxRadius * progress
+                        path.addOval(
+                            Rect(
+                                left = ox - radius,
+                                top = oy - radius,
+                                right = ox + radius,
+                                bottom = oy + radius
+                            )
+                        )
+                    }
+
+                    drawPath(path = path, color = overlayColor, style = Fill)
+
+                    if (glow > 0f && progress > 0f && progress < 1f) {
                         val ringAlpha = (1f - progress).coerceIn(0f, 1f) * 0.30f
+                        val radius = maxRadius * progress
                         drawCircle(
                             color = glowColor.copy(alpha = ringAlpha),
                             radius = radius + strokePx / 2f,
@@ -110,20 +140,6 @@ fun ThemeRevealOverlay(
                             style = Stroke(width = strokePx)
                         )
                     }
-
-                    val path = Path().apply {
-                        fillType = PathFillType.EvenOdd
-                        addRect(Rect(0f, 0f, w, h))
-                        addOval(
-                            Rect(
-                                left = origin.x - radius,
-                                top = origin.y - radius,
-                                right = origin.x + radius,
-                                bottom = origin.y + radius
-                            )
-                        )
-                    }
-                    drawPath(path = path, color = overlayColor, style = Fill)
                 }
             }
     )
