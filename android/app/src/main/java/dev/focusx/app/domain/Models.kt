@@ -68,6 +68,8 @@ data class Session(
     }
 }
 
+enum class ThemeMode { SYSTEM, LIGHT, DARK }
+
 @Immutable
 data class Settings(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,

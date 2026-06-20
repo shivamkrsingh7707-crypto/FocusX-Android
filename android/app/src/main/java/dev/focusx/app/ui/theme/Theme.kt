@@ -16,8 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-
-enum class ThemeMode { SYSTEM, LIGHT, DARK }
+import dev.focusx.app.domain.ThemeMode
 
 /**
  * A flat colour-token table for the current theme. We keep this an

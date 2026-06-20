@@ -246,9 +246,9 @@ fun HomeScreen(
         }
 
         Spacer(modifier = Modifier.height(4.dp))
-        SectionLabel(text = "This week") {
+        SectionLabel(text = "This week", right = {
             GhostButton(text = "Open stats", onClick = onOpenStats)
-        }
+        })
         SurfaceCard(modifier = Modifier.fillMaxWidth(), contentPadding = 16.dp) {
             WeeklyBarChart(
                 data = week,

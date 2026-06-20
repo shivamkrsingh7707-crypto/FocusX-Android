@@ -100,7 +100,7 @@ fun TimerRing(
     val timeText = "%02d:%02d".format(minutes, seconds)
 
     val track = FocusXTheme.colors.hairline
-    val tickFg = FocusXTheme.colors.textHi
+    val tickFg = FocusXTheme.colors.onSurface
     val subFg = FocusXTheme.colors.textSecondary
 
     Box(

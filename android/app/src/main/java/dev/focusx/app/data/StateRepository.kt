@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dev.focusx.app.domain.AppState
+import dev.focusx.app.domain.Session
 import dev.focusx.app.domain.Settings
 import dev.focusx.app.domain.Subject
 import dev.focusx.app.domain.ThemeMode
@@ -105,12 +106,12 @@ class StateRepository(private val context: Context) {
             val current = decodeSessions(prefs[KEY_SESSIONS]).toMutableList()
             current.add(
                 0,
-                SessionRecord(
+                Session(
                     id = java.util.UUID.randomUUID().toString(),
                     subjectId = subjectId,
                     minutes = minutes,
-                    date = isoToday(),
-                    phase = phase.name,
+                    date = LocalDate.parse(isoToday(), DateTimeFormatter.ISO_LOCAL_DATE),
+                    phase = phase,
                     startedAt = startedAt
                 )
             )
@@ -155,19 +156,19 @@ class StateRepository(private val context: Context) {
         }.getOrNull()
     }
 
-    private fun encodeSession(r: SessionRecord): String =
-        "${r.id}|${r.subjectId ?: ""}|${r.minutes}|${r.date}|${r.phase}|${r.startedAt}"
+    private fun encodeSession(s: dev.focusx.app.domain.Session): String =
+        "${s.id}|${s.subjectId ?: ""}|${s.minutes}|${s.date.format(DateTimeFormatter.ISO_LOCAL_DATE)}|${s.phase.name}|${s.startedAt}"
 
-    private fun decodeSessions(raw: Set<String>?): List<dev.focusx.app.domain.Session> =
+    private fun decodeSessions(raw: Set<String>?): List<Session> =
         raw.orEmpty()
             .mapNotNull(::tryDecodeSession)
             .sortedByDescending { it.startedAt }
 
-    private fun tryDecodeSession(s: String): dev.focusx.app.domain.Session? {
+    private fun tryDecodeSession(s: String): Session? {
         val parts = s.split('|')
         if (parts.size < 6) return null
         return runCatching {
-            dev.focusx.app.domain.Session(
+            Session(
                 id = parts[0],
                 subjectId = parts[1].ifEmpty { null },
                 minutes = parts[2].toInt(),
@@ -178,20 +179,11 @@ class StateRepository(private val context: Context) {
         }.getOrNull()
     }
 
-    private data class SessionRecord(
-        val id: String,
-        val subjectId: String?,
-        val minutes: Int,
-        val date: String,
-        val phase: String,
-        val startedAt: Long
-    )
-
     /**
      * Walk backwards from today counting consecutive days with at least
      * one session. Stops at the first gap.
      */
-    private fun computeStreak(sessions: List<dev.focusx.app.domain.Session>): Int {
+    private fun computeStreak(sessions: List<Session>): Int {
         if (sessions.isEmpty()) return 0
         val days = sessions.map { it.date }.toHashSet()
         var streak = 0

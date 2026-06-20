@@ -71,13 +71,14 @@ fun AppNavigation(
     onReminder: (Boolean) -> Unit
 ) {
     val theme = FocusXTheme.colors
+    val systemDark = isSystemInDarkTheme()
     var current by rememberSaveable { mutableStateOf(ROUTE_HOME) }
     var revealActive by remember { mutableStateOf(false) }
     var revealOrigin by remember { mutableStateOf(Offset.Zero) }
     var revealTargetDark by remember { mutableStateOf(true) }
 
     val isTargetDark = when (ui.snapshot.settings.themeMode) {
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        ThemeMode.SYSTEM -> systemDark
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true
     }
@@ -135,7 +136,7 @@ fun AppNavigation(
                             // so the new theme is already on screen
                             // when the hole expands over the old one.
                             revealTargetDark = when (mode) {
-                                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+                                ThemeMode.SYSTEM -> systemDark
                                 ThemeMode.LIGHT -> false
                                 ThemeMode.DARK -> true
                             }
